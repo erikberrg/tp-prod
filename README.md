@@ -1,4 +1,4 @@
-<img src="https://github.com/erikberrg/track-pacer/blob/main/assets/images/icon.png" width="64">
+<img src="https://github.com/erikberrg/tp-prod/blob/main/assets/images/icon.png" width="64">
 
 # Track Pacer System
 An **interactive LED pacing system** for a 200m track, designed to help runners train with precise pacing.  The system is controlled via a **React Native app**, which allows users to create custom presets for speed, color, distance, and repetitions.  The lights are powered by **WS2812B LEDs** and controlled by **Teensy 4.1 microcontrollers** that synchronize via **WiFi and Bluetooth**
