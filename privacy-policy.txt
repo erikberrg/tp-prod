@@ -1,0 +1,40 @@
+**Privacy Policy**  
+**Track Pacer Application**  
+**Last Updated: March 23, 2025**
+
+Thank you for using the Track Pacer application. Your privacy is important to us, and we are committed to protecting any personal information you may provide. This Privacy Policy explains how we collect, use, and safeguard your information when you use our application.
+
+---
+
+**1. Information We Collect**  
+We collect the following types of information when you use the Track Pacer application:
+
+- **Bluetooth and Device Information:** To enable Bluetooth connectivity with the light system, we must access Bluetooth.
+
+---
+
+**2. How We Use Your Information**  
+We use the information collected to:
+
+- Enable Bluetooth communication between your device and the light system.
+
+---
+
+**3. Data Sharing and Disclosure**  
+We do not sell, trade, or rent your personal information to third parties.
+
+- The Bluetooth data is not saved after use.
+
+---
+
+**4. Changes to This Privacy Policy**  
+We may update this Privacy Policy from time to time. Any changes will be reflected in the "Last Updated" date. Continued use of the application after updates constitutes acceptance of the revised policy.
+
+---
+
+**5. Contact Us**  
+If you have any questions about this Privacy Policy or your data, please contact us at erikd.berg@outlook.com.
+
+---
+
+By using the Track Pacer application, you agree to the terms of this Privacy Policy.
