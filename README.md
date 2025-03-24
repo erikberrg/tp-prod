@@ -1,50 +1,22 @@
-# Welcome to your Expo app 👋
+<img src="https://github.com/erikberrg/track-pacer/blob/main/assets/images/icon.png" width="64">
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Track Pacer System
+An **interactive LED pacing system** for a 200m track, designed to help runners train with precise pacing.  The system is controlled via a **React Native app**, which allows users to create custom presets for speed, color, distance, and repetitions.  The lights are powered by **WS2812B LEDs** and controlled by **Teensy 4.1 microcontrollers** that synchronize via **WiFi and Bluetooth**
 
-## Get started
+## Features
+**Customizable Pacing Presets** - Set distance, speed, color, repetitions, and delays.
+**Real-Time Synchronization** - LEDs light up in sync with a moving animation in the app.
+**Multi-Device Communication** - Teensy microcontrollers communicate over WiFi while the React Native app uses BLE for real-time control.
 
-1. Install dependencies
+## Tech Stack
+**Frontend:** React Native (Expo)
+**Backend:** Arduino IDE / Async Storage Library
+**Microcontrollers:** Teensy 4.1
+**BLE:** Adafruit BLE UART Friend
+**LED Control:** FastLED Library (WS2812B)
 
-   ```bash
-   npm install
-   ```
+## Contributors
+Erik Berg & Jacob Jeager
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## License
+This project is licensed under the MIT License.
