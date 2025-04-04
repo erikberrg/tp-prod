@@ -5,7 +5,6 @@ import { theme } from "../constants/theme";
 import Icon from "../assets/icons";
 import bleHelper from "../helpers/ble";
 import { useAnimationContext } from "./AnimationContext";
-import { BlurView } from "expo-blur";
 
 const Toaster = () => {
   const { resetAnimation } = useAnimationContext(); // Use the reset function
@@ -13,8 +12,7 @@ const Toaster = () => {
   const isDarkTheme = colorScheme === "dark";
   const toastConfig = {
     pacerToast: () => (
-      <BlurView
-        intensity={100}
+      <View
         style={{
           height: 30,
           borderRadius: 20,
@@ -71,19 +69,18 @@ const Toaster = () => {
             </Text>
           </View>
         </TouchableOpacity>
-      </BlurView>
+      </View>
     ),
     bluetoothToast: ({ text1, text2 }) => (
-      <BlurView
-        intensity={100}
+      <View
         style={{
           height: 40,
           width: 160,
           borderWidth: 0.6,
           borderColor: isDarkTheme ? theme.darkColors.border : theme.lightColors.border,
           backgroundColor: isDarkTheme
-            ? theme.darkColors.background
-            : theme.lightColors.background,
+            ? theme.darkColors.button
+            : theme.lightColors.button,
           borderRadius: 25,
           borderCurve: "continuous",
           justifyContent: "center",
@@ -131,7 +128,7 @@ const Toaster = () => {
             {text2}
           </Text>
         </View>
-      </BlurView>
+      </View>
     ),
   };
   return <Toast config={toastConfig} />;
