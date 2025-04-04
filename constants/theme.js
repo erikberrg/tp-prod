@@ -16,7 +16,8 @@ export const theme = {
       sectionButton: "#E8E8E8", 
       buttonText: "#262626",
       track: "#EAEAEA",
-      tabButton: "#EFEFEF", 
+      tabButton: "#EFEFEF",
+      colorSelector: "#ffffff75",
     },
   
     darkColors: {
@@ -33,6 +34,7 @@ export const theme = {
       buttonText: "#F1F1F1", 
       track: "#252525",
       tabButton: "#303030",
+      colorSelector: "#00000075",
     },
   
     fonts: {

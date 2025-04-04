@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     display: "flex",
+    height: '100%',
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

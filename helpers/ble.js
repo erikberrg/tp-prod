@@ -55,6 +55,25 @@ class BLEHelper {
       }, 4000);
     });
   }
+  
+  async sendTest(color, duration, distance, repetitions, delay) {
+    const test = `${color} ${duration} ${distance} ${repetitions} ${delay}`;
+    if (!this.device) {
+      console.error("No device connected.");
+      return;
+    }
+    try {
+      const base64Message = Buffer.from(test, "utf-8").toString("base64");
+      await this.device.writeCharacteristicWithResponseForService(
+        UART_SERVICE_UUID,
+        TX_CHARACTERISTIC_UUID,
+        base64Message
+      );
+      console.log(`Sent test command: ${test}`);
+    } catch {
+      console.error("Error sending test command:", error);
+    }
+  }
 
   async sendPacer(color, duration) {
     const pacer = `start ${color} ${duration}`;
@@ -70,11 +89,13 @@ class BLEHelper {
         TX_CHARACTERISTIC_UUID,
         base64Message
       );
+      console.log(`${color}, ${duration}, ${distance}, ${repetitions}, ${delay}`);
       console.log(`Sent pacer command: ${pacer}`);
     } catch (error) {
       console.error("Error sending color command:", error);
     }
   }
+
   async sendStop() {
     const stop = `stop`;
     if (!this.device) {

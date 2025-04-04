@@ -91,6 +91,7 @@ export default function ViewPresets() {
   const startPacerAnimation = async (pacer) => {
     await Promise.all([
       bleHelper.sendPacer(pacer.color, pacer.seconds),
+      bleHelper.sendTest(pacer.color, pacer.minutes, pacer.distance, pacer.repetitions, pacer.delay),
       startAnimation(
         calculateDuration(pacer.minutes, pacer.seconds),
         calculateDistance(pacer.distance),
@@ -108,7 +109,6 @@ export default function ViewPresets() {
       await startPacerAnimation(pacer);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
       router.push("/(main)");
-      // Start pacer timer
       Toast.show({
         type: "pacerToast",
         position: "bottom",
@@ -123,9 +123,10 @@ export default function ViewPresets() {
         text1: "Bluetooth",
         text2: "Not Connected",
         position: "top",
-        topOffset: 70,
+        topOffset: 65,
         visibilityTime: 4000,
         autoHide: true,
+        swipeable: true,
       });
     }
   };

@@ -4,7 +4,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import { AnimationProvider } from "../components/AnimationContext";
 import { theme } from "../constants/theme";
-import { Button, useColorScheme } from "react-native";
+import { TouchableOpacity, useColorScheme, Text } from "react-native";
 import { useNavigation } from "expo-router";
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
@@ -16,11 +16,11 @@ configureReanimatedLogger({
 const HeaderLeftButton = ({ isDarkTheme }) => {
   const navigation = useNavigation();
   return (
-    <Button
-      title="Cancel"
-      color={isDarkTheme ? theme.darkColors.text : theme.lightColors.text}
-      onPress={() => navigation.goBack()}
-    />
+    <TouchableOpacity
+     style={{ marginLeft: 6 }} onPress={() => navigation.goBack()}
+    >
+      <Text style={{color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontSize: 18}}>Cancel</Text>
+    </TouchableOpacity>
   );
 };
 

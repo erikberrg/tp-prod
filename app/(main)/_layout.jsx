@@ -1,7 +1,7 @@
 // Tab layout screen to navigate between home, add, and presets
 
 import React from "react";
-import Icon from "../..//assets/icons";
+import Icon from "../../assets/icons";
 import Toaster from "../../components/Toaster";
 import * as Haptics from "expo-haptics";
 import { Tabs, useNavigation } from "expo-router";
@@ -62,8 +62,8 @@ const _layout = () => {
     <GestureHandlerRootView>
       <Tabs
         screenOptions={{
+          headerLargeTitle: true,
           animation: "shift",
-          headerShown: true,
           headerStyle: styles.header,
           headerTintColor: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
           tabBarShowLabel: false,

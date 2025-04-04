@@ -50,14 +50,14 @@ const styles = StyleSheet.create({
   },
   row: {
     width: "100%",
-    height: 50,
+    height: 52,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
     justifyContent: "space-between",
   }, 
   label: {
-    fontSize: 16,
+    fontSize: 17,
   },
   button: {
     paddingHorizontal: 12,

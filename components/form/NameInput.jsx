@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    height: 50,
-    fontSize: 16,
+    height: 52,
+    fontSize: 17,
     paddingHorizontal: 24,
   },
 });

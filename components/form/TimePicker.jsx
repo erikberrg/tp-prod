@@ -7,7 +7,8 @@ import Animated, { FadeInUp, FadeOutUp, LinearTransition } from "react-native-re
 export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
-  const times = Array.from({ length: 60 }, (_, i) => i);
+  const timesMin = Array.from({ length: 60 }, (_, i) => i);
+  const timesSec = Array.from({ length: 59 }, (_, i) => i + 1);
   const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const toggleVisibility = (setter) => {
     Keyboard.dismiss();
@@ -31,7 +32,7 @@ export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
             onValueChange={(min) => onChangeTime(min, seconds)}
             style={styles.picker}
           >
-            {times.map((time) => (
+            {timesMin.map((time) => (
               <Picker.Item key={time} label={`${time} min`} value={time} />
             ))}
           </Picker>
@@ -40,7 +41,7 @@ export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
             onValueChange={(sec) => onChangeTime(minutes, sec)}
             style={styles.picker}
           >
-            {times.map((time) => (
+            {timesSec.map((time) => (
               <Picker.Item key={time} label={`${time} sec`} value={time} />
             ))}
           </Picker>
@@ -59,14 +60,14 @@ const styles = StyleSheet.create({
   },
   row: {
     width: "100%",
-    height: 50,
+    height: 52,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
     justifyContent: "space-between",
   },
   label: {
-    fontSize: 16,
+    fontSize: 17,
   },
   button: {
     paddingHorizontal: 12,

@@ -4,7 +4,8 @@ import Toast from "react-native-toast-message";
 import { theme } from "../constants/theme";
 import Icon from "../assets/icons";
 import bleHelper from "../helpers/ble";
-import { useAnimationContext } from "./AnimationContext"; // Import the context
+import { useAnimationContext } from "./AnimationContext";
+import { BlurView } from "expo-blur";
 
 const Toaster = () => {
   const { resetAnimation } = useAnimationContext(); // Use the reset function
@@ -12,7 +13,8 @@ const Toaster = () => {
   const isDarkTheme = colorScheme === "dark";
   const toastConfig = {
     pacerToast: () => (
-      <View
+      <BlurView
+        intensity={100}
         style={{
           height: 30,
           borderRadius: 20,
@@ -32,7 +34,22 @@ const Toaster = () => {
             resetAnimation();
           }}
         >
-          <View style={{ borderRadius: 16, paddingHorizontal: 6, paddingVertical: 2, display: "flex", flexDirection: "row", gap: 4, justifyContent: "center", alignItems: "center",borderWidth: 1, borderColor: isDarkTheme ? theme.darkColors.icon : theme.lightColors.icon }}>
+          <View
+            style={{
+              borderRadius: 16,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              display: "flex",
+              flexDirection: "row",
+              gap: 4,
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: isDarkTheme
+                ? theme.darkColors.track
+                : theme.lightColors.track,
+            }}
+          >
             <Icon
               name="stop"
               size={24}
@@ -43,33 +60,45 @@ const Toaster = () => {
                 isDarkTheme ? theme.darkColors.icon : theme.lightColors.icon
               }
             />
-            <Text style={{color: isDarkTheme ? theme.darkColors.icon : theme.lightColors.icon}}>Stop</Text>
+            <Text
+              style={{
+                color: isDarkTheme
+                  ? theme.darkColors.icon
+                  : theme.lightColors.icon,
+              }}
+            >
+              Stop
+            </Text>
           </View>
         </TouchableOpacity>
-      </View>
+      </BlurView>
     ),
     bluetoothToast: ({ text1, text2 }) => (
-      <View
+      <BlurView
+        intensity={100}
         style={{
-          height: 50,
-          width: 200,
+          height: 40,
+          width: 160,
+          borderWidth: 0.6,
+          borderColor: isDarkTheme ? theme.darkColors.border : theme.lightColors.border,
           backgroundColor: isDarkTheme
-            ? theme.darkColors.section
-            : theme.lightColors.bg,
-          borderRadius: 40,
+            ? theme.darkColors.background
+            : theme.lightColors.background,
+          borderRadius: 25,
           borderCurve: "continuous",
           justifyContent: "center",
           alignItems: "center",
           shadowColor: theme.colors.dark,
           shadowOffset: { width: 0, height: 5 },
           shadowOpacity: 0.1,
-          shadowRadius: 8,
+          shadowRadius: 20,
           elevation: 4,
           display: "flex",
           flexDirection: "row",
           gap: 20,
           justifyContent: "center",
           alignItems: "center",
+          overflow: "hidden",
         }}
       >
         <View
@@ -86,6 +115,7 @@ const Toaster = () => {
               color: isDarkTheme
                 ? theme.darkColors.subtext
                 : theme.lightColors.subtext,
+              fontSize: 12,
             }}
           >
             {text1}
@@ -95,12 +125,13 @@ const Toaster = () => {
               color: isDarkTheme
                 ? theme.darkColors.icon
                 : theme.lightColors.icon,
+              fontSize: 12,
             }}
           >
             {text2}
           </Text>
         </View>
-      </View>
+      </BlurView>
     ),
   };
   return <Toast config={toastConfig} />;

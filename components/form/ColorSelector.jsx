@@ -24,8 +24,13 @@ export const ColorSelector = ({ selectedColor, onSelectColor }) => {
               styles.colorCircle,
               {
                 backgroundColor: color,
-                borderWidth: selectedColor === color ? 3 : 0,
-                borderColor: isDarkTheme ? theme.darkColors.sectionButton : theme.lightColors.sectionButton,
+                borderWidth: selectedColor === color ? 2 : 0,
+                borderColor: isDarkTheme ? theme.darkColors.colorSelector : theme.lightColors.colorSelector,
+                shadowColor: color,
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.3,
+                shadowRadius: 2,
+                elevation: 4,
               },
             ]}
             onPress={() => onSelectColor(color)}
@@ -46,16 +51,16 @@ const styles = StyleSheet.create({
   },
   colorSelector: {
     flexDirection: "row",
-    height: 50,
+    height: 52,
     justifyContent: "space-evenly",
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 12,
+    gap: 4,
   },
   colorCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginHorizontal: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
 });

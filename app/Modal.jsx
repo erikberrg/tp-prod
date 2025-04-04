@@ -4,11 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import {
-  Platform,
   StyleSheet,
   View,
-  Button,
+  TouchableOpacity,
   useColorScheme,
+  Text,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { theme } from "../constants/theme";
@@ -30,21 +30,20 @@ export default function ModalScreen() {
 
   const styles = StyleSheet.create({
     container: {
+      paddingTop: 10,
       flex: 1,
       alignItems: "center",
       justifyContent: "flex-start",
-      paddingTop: Platform.OS === "ios" ? 10 : 0,
       backgroundColor: theme.colors.offWhite,
       gap: 10,
     },
     section: {
       width: "90%",
-      backgroundColor: theme.colors.white,
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       flexDirection: "column",
-      borderRadius: 10,
+      borderRadius: 12,
       borderCurve: "continuous",
     },
   });
@@ -56,7 +55,7 @@ export default function ModalScreen() {
     distance: 200,
     minutes: 0,
     seconds: 30,
-    repetitions: 1,
+    repetitions: 0,
     delay: 0,
   });
 
@@ -97,12 +96,27 @@ export default function ModalScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Button
-          title="Add"
-          color={isDarkTheme ? theme.darkColors.text : theme.lightColors.text}
-          onPress={handleExportData}
-          disabled={!isFormValid}
-        />
+      <TouchableOpacity
+        onPress={handleExportData}
+        disabled={!isFormValid}
+        style={{ marginRight: 6 }}
+      >
+        <Text
+        style={{
+          color: isFormValid
+          ? isDarkTheme
+            ? theme.darkColors.text
+            : theme.lightColors.text
+          : isDarkTheme
+          ? theme.darkColors.subtext
+          : theme.darkColors.subtext,
+          fontWeight: theme.fonts.medium,
+          fontSize: 18,
+        }}
+        >
+        Add
+        </Text>
+      </TouchableOpacity>
       ),
     });
   }, [navigation, pacerData, isDarkTheme, isFormValid]);
@@ -141,13 +155,13 @@ export default function ModalScreen() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
           }}
         >
           <View
             style={{
-              width: "95%",
+              width: "90%",
               borderBottomColor: dividerColor,
               borderBottomWidth: 0.3,
             }}
@@ -186,13 +200,13 @@ export default function ModalScreen() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
           }}
         >
           <View
             style={{
-              width: "95%",
+              width: "90%",
               borderBottomColor: dividerColor,
               borderBottomWidth: 0.3,
             }}
@@ -234,13 +248,13 @@ export default function ModalScreen() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
           }}
         >
           <View
             style={{
-              width: "95%",
+              width: "90%",
               borderBottomColor: dividerColor,
               borderBottomWidth: 0.3,
             }}
