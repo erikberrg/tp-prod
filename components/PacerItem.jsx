@@ -1,14 +1,24 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, useColorScheme } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  useColorScheme,
+  TouchableOpacity,
+} from "react-native";
 import Button from "../components/ui/Button";
 import Icon from "../assets/icons";
 import { theme } from "../constants/theme";
-import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Divider from "../components/ui/Divider";
-import RightAction from "../components/RightAction";
 import Loading from "../components/ui/Loading";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated";
 
-export default function PacerItem({ pacer, onStart, onDelete }) {
+export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const iconColor = isDarkTheme
@@ -23,20 +33,32 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
 
   const [loading, setLoading] = useState(false);
 
+  const slideOffset = useSharedValue(editMode ? -36 : 0);
+  const deleteOpacity = useSharedValue(editMode ? 1 : 0);
+
+  useEffect(() => {
+    slideOffset.value = withTiming(editMode ? -36 : 0, { duration: 200 });
+    deleteOpacity.value = withTiming(editMode ? 1 : 0, { duration: 300 });
+  }, [editMode]);
+
+  const slideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideOffset.value }],
+  }));
+
+  const deleteButtonStyle = useAnimatedStyle(() => ({
+    opacity: deleteOpacity.value,
+    transform: [
+      {
+        scale: interpolate(deleteOpacity.value, [0, 1], [0.6, 1]),
+      },
+    ],
+  }));
+
   return (
     <View style={{ width: "100%", display: "flex", flexDirection: "column" }}>
-      <ReanimatedSwipeable
-        renderRightActions={(progress, dragX) => (
-          <RightAction dragX={dragX} id={pacer.id} onDelete={onDelete} />
-        )}
-        friction={2}
-        enableTrackpadTwoFingerGesture
-        leftThreshold={30}
-        rightThreshold={40}
-        overshootRight={true}
-      >
-        <View style={styles.pacerItem}>
-          <View style={styles.buttonContainer}>
+      <View style={styles.pacerItem}>
+        <Animated.View style={[styles.pacerItemRow, slideStyle]}>
+          <View style={styles.infoContainer}>
             <View
               style={[
                 styles.color,
@@ -74,12 +96,15 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
               </View>
             </View>
           </View>
-          <View style={styles.buttonContainer}>
+
+          <View style={styles.actionGroup}>
             {loading ? (
               <View
                 style={{
                   height: 35,
                   width: 70,
+                  justifyContent: "center",
+                  alignItems: "center",
                   backgroundColor: isDarkTheme
                     ? theme.darkColors.button
                     : theme.lightColors.button,
@@ -87,10 +112,8 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
                   borderColor: isDarkTheme
                     ? theme.darkColors.border
                     : theme.lightColors.border,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: theme.radius.xl,}}
+                  borderRadius: theme.radius.xl,
+                }}
               >
                 <Loading />
               </View>
@@ -108,8 +131,8 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
                   height: 35,
                   width: 70,
                   backgroundColor: isDarkTheme
-                    ? theme.darkColors.button
-                    : theme.lightColors.button,
+                    ? theme.darkColors.tabButton
+                    : theme.lightColors.tabButton,
                   borderWidth: 0.5,
                   borderColor: isDarkTheme
                     ? theme.darkColors.border
@@ -124,9 +147,47 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
                 }}
               />
             )}
+
+            <Animated.View
+              style={[
+                styles.deleteButtonWrapper,
+                {
+                  position: "absolute",
+                  left: 76,
+                },
+                deleteButtonStyle,
+              ]}
+            >
+                <TouchableOpacity
+                  onPress={() => onDelete(pacer.id)}
+                  disabled={!editMode}
+                  style={{
+                    height: 35,
+                    width: 35,
+                    backgroundColor: isDarkTheme
+                      ? theme.darkColors.tabButton
+                      : theme.lightColors.tabButton,
+                    borderWidth: 0.5,
+                    borderColor: isDarkTheme
+                      ? theme.darkColors.border
+                      : theme.lightColors.border,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 18,
+                    marginLeft: 8,
+                  }}
+                >
+                  <Icon
+                    name="delete"
+                    size={16}
+                    color={iconColor}
+                    fill={iconColor}
+                  />
+                </TouchableOpacity>
+            </Animated.View>
           </View>
-        </View>
-      </ReanimatedSwipeable>
+        </Animated.View>
+      </View>
       <Divider />
     </View>
   );
@@ -135,39 +196,44 @@ export default function PacerItem({ pacer, onStart, onDelete }) {
 const styles = StyleSheet.create({
   pacerItem: {
     width: "100%",
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 0,
+  },
+  pacerItemRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 10,
     paddingHorizontal: 30,
   },
-  buttonContainer: {
-    display: "flex",
-    height: '100%',
+  infoContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     gap: 12,
   },
   color: { height: 50, width: 50, borderRadius: 25 },
-
   infoTitle: { fontSize: 16, fontWeight: "bold" },
   infoText: {
     fontSize: 14,
     fontWeight: theme.fonts.light,
   },
-
   infoWrapper: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     gap: 5,
   },
-  separator: {
-    width: "100%",
-    borderTopWidth: 1,
-    borderColor: "#000",
+  actionGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    position: "relative",
+    width: 70,
+    height: 35,
+  },
+  deleteButtonWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

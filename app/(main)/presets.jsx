@@ -90,8 +90,14 @@ export default function ViewPresets() {
   // Start pacer helper
   const startPacerAnimation = async (pacer) => {
     await Promise.all([
-      bleHelper.sendPacer(pacer.color, pacer.seconds),
-      bleHelper.sendTest(pacer.color, pacer.minutes, pacer.distance, pacer.repetitions, pacer.delay),
+      bleHelper.sendPacer(pacer.color, calculateDuration(pacer.minutes, pacer.seconds)),
+      bleHelper.sendTest(
+        pacer.color,
+        pacer.minutes,
+        pacer.distance,
+        pacer.repetitions,
+        pacer.delay
+      ),
       startAnimation(
         calculateDuration(pacer.minutes, pacer.seconds),
         calculateDistance(pacer.distance),
@@ -123,11 +129,12 @@ export default function ViewPresets() {
         text1: "Bluetooth",
         text2: "Not Connected",
         position: "top",
-        topOffset: 65,
+        topOffset: 60,
         visibilityTime: 4000,
         autoHide: true,
         swipeable: true,
       });
+      console.log("start " + pacer.color + "(hex) " + calculateDuration(pacer.minutes, pacer.seconds) + "(duration in millisec) " + pacer.distance + "(distance in meters) " + pacer.repetitions + "(repetitions int) " + (pacer.delay * 1000) + "(delay in millisec)");
     }
   };
 

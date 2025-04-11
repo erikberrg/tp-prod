@@ -52,7 +52,8 @@ const _layout = () => {
                   ? theme.darkColors.modalBg
                   : theme.lightColors.modalBg,
               },
-            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
+              headerTitleAlign: "center",
+              headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
             })}
           />
         </Stack>

@@ -12,6 +12,7 @@ import Pause from './Pause';
 import Delete from './Delete';
 import Bluetooth from './Bluetooth';
 import Stop from './Stop';
+import Search from './Search';
 
 const icons = {
     home: Home,
@@ -23,7 +24,8 @@ const icons = {
     pause: Pause,
     delete: Delete,
     bluetooth: Bluetooth,
-    stop: Stop
+    stop: Stop,
+    search: Search
 }
 
 const Icon = ({name, ...props}) => {

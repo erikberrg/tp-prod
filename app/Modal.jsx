@@ -55,7 +55,7 @@ export default function ModalScreen() {
     distance: 200,
     minutes: 0,
     seconds: 30,
-    repetitions: 0,
+    repetitions: 1,
     delay: 0,
   });
 
@@ -97,7 +97,7 @@ export default function ModalScreen() {
     navigation.setOptions({
       headerRight: () => (
       <TouchableOpacity
-        onPress={handleExportData}
+        onPressOut={handleExportData}
         disabled={!isFormValid}
         style={{ marginRight: 6 }}
       >

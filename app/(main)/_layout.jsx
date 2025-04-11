@@ -5,7 +5,14 @@ import Icon from "../../assets/icons";
 import Toaster from "../../components/Toaster";
 import * as Haptics from "expo-haptics";
 import { Tabs, useNavigation } from "expo-router";
-import { View, Platform, Pressable, useColorScheme, StyleSheet } from "react-native";
+import {
+  View,
+  Platform,
+  Pressable,
+  useColorScheme,
+  StyleSheet,
+  Easing,
+} from "react-native";
 import { theme } from "../../constants/theme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -18,6 +25,7 @@ const _layout = () => {
   const styles = StyleSheet.create({
     tabBar: {
       borderTopWidth: 0,
+      boxShadow: "0px 0px 0px 0px",
       height: 90,
       paddingTop: 16,
       backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg,
@@ -28,11 +36,15 @@ const _layout = () => {
     addButtonContainer: {
       height: 50,
       width: 65,
-      backgroundColor: isDarkTheme ? theme.darkColors.tabButton : theme.lightColors.tabButton,
+      backgroundColor: isDarkTheme
+        ? theme.darkColors.tabButton
+        : theme.lightColors.tabButton,
       borderRadius: 16,
       borderCurve: "continuous",
       borderWidth: 0.5,
-      borderColor: isDarkTheme ? theme.darkColors.border : theme.lightColors.border,
+      borderColor: isDarkTheme
+        ? theme.darkColors.border
+        : theme.lightColors.border,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -63,13 +75,31 @@ const _layout = () => {
       <Tabs
         screenOptions={{
           headerLargeTitle: true,
-          animation: "shift",
           headerStyle: styles.header,
-          headerTintColor: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+          headerTintColor: isDarkTheme
+            ? theme.darkColors.text
+            : theme.lightColors.text,
           tabBarShowLabel: false,
           headerShadowVisible: false,
-          tabBarActiveTintColor: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+          tabBarActiveTintColor: isDarkTheme
+            ? theme.darkColors.text
+            : theme.lightColors.text,
           tabBarStyle: styles.tabBar,
+          transitionSpec: {
+            animation: "timing",
+            config: {
+              duration: 50,
+              easing: Easing.linear(Easing.ease),
+            },
+          },
+          sceneStyleInterpolator: ({ current }) => ({
+            sceneStyle: {
+              opacity: current.progress.interpolate({
+                inputRange: [-1, 0, 1],
+                outputRange: [0, 1, 0],
+              }),
+            },
+          }),
         }}
       >
         {/* Home */}
@@ -87,6 +117,13 @@ const _layout = () => {
                 width={28}
               />
             ),
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
+            ),
           }}
         />
 
@@ -95,13 +132,25 @@ const _layout = () => {
           name="add"
           options={{
             title: "Add",
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
+            ),
             tabBarIcon: ({ color }) => (
               <View style={styles.addButtonContainer}>
-                <Pressable style={styles.addButton} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+                <Pressable
+                  style={styles.addButton}
+                  onPressIn={handlePressIn}
+                  onPressOut={handlePressOut}
+                >
                   <Icon name="plus" color={color} strokeWidth={2.5} />
                 </Pressable>
               </View>
             ),
+            
           }}
           listeners={({ navigation }) => ({
             tabPress: (e) => e.preventDefault(),
@@ -114,7 +163,20 @@ const _layout = () => {
           options={{
             title: "View Presets",
             tabBarIcon: ({ color }) => (
-              <Icon name="list" color={color} strokeWidth={2.5} height={28} width={28} />
+              <Icon
+                name="list"
+                color={color}
+                strokeWidth={2.5}
+                height={28}
+                width={28}
+              />
+            ),
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
             ),
           }}
         />

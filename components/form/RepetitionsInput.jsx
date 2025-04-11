@@ -7,7 +7,7 @@ import Animated, { FadeInUp, FadeOutUp, LinearTransition } from "react-native-re
 export const RepetitionsInput = ({ repetitions, onChangeRepetitions }) => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
-  const times = Array.from({ length: 60 }, (_, i) => i);
+  const times = Array.from({ length: 59 }, (_, i) => i + 1);
   const [isRepetitionPickerVisible, setIsRepetitionPickerVisible] = useState(false);
   const toggleVisibility = (setter) => {
     Keyboard.dismiss();

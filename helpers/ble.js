@@ -17,10 +17,25 @@ class BLEHelper {
   }
 
   async requestPermissions() {
-    if (Platform.OS === "android") {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    if (Platform.OS === "android" && Platform.Version >= 23) {
+      const permissions = [];
+  
+      permissions.push(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+  
+      if (Platform.Version >= 31) {
+        // Android 12+ additional BLE permissions
+        permissions.push(PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN);
+        permissions.push(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT);
+      }
+  
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
+      const allGranted = Object.values(granted).every(
+        status => status === PermissionsAndroid.RESULTS.GRANTED
       );
+  
+      if (!allGranted) {
+        console.warn("Not all BLE permissions granted.");
+      }
     }
   }
 

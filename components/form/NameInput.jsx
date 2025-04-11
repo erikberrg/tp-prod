@@ -9,9 +9,10 @@ export const NameInput = ({ value, onChange }) => {
     <View style={styles.container}>
       <TextInput
         autoCapitalize="words"
-        style={[styles.input,{color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text}]}
+        style={[styles.input, { color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text }]}
         value={value}
         placeholder="Name"
+        placeholderTextColor={isDarkTheme ? theme.darkColors.subtext : theme.lightColors.subtext}
         onChangeText={onChange}
         autoFocus
       />

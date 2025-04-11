@@ -79,8 +79,8 @@ const Toaster = () => {
           borderWidth: 0.6,
           borderColor: isDarkTheme ? theme.darkColors.border : theme.lightColors.border,
           backgroundColor: isDarkTheme
-            ? theme.darkColors.button
-            : theme.lightColors.button,
+            ? theme.darkColors.tabButton
+            : theme.lightColors.tabButton,
           borderRadius: 25,
           borderCurve: "continuous",
           justifyContent: "center",
