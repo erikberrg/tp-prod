@@ -13,6 +13,10 @@ import Delete from './Delete';
 import Bluetooth from './Bluetooth';
 import Stop from './Stop';
 import Search from './Search';
+import Trophy from './Trophy';
+import Profile from './Profile';
+import Clipboard from './Clipboard';
+import Settings from './Settings';
 
 const icons = {
     home: Home,
@@ -25,7 +29,11 @@ const icons = {
     delete: Delete,
     bluetooth: Bluetooth,
     stop: Stop,
-    search: Search
+    search: Search,
+    trophy: Trophy,
+    profile: Profile,
+    clipboard: Clipboard,
+    settings: Settings
 }
 
 const Icon = ({name, ...props}) => {

@@ -12,6 +12,8 @@ import {
   useColorScheme,
   StyleSheet,
   Easing,
+  TouchableOpacity,
+  Text,
 } from "react-native";
 import { theme } from "../../constants/theme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -21,6 +23,17 @@ const _layout = () => {
   const isDarkTheme = colorScheme === "dark";
   const navigation = useNavigation();
 
+  const SettingsButton = ({ isDarkTheme }) => {
+    const navigation = useNavigation();
+    return (
+      <TouchableOpacity
+       style={{ marginRight: 16 }} onPress={() => navigation.navigate('settings')}
+      >
+        <Icon name="settings" color={isDarkTheme ? theme.darkColors.text : theme.lightColors.text} fill={"none"} size={28} strokeWidth={2} />
+      </TouchableOpacity>
+    );
+  };
+
   // Styles
   const styles = StyleSheet.create({
     tabBar: {
@@ -28,6 +41,7 @@ const _layout = () => {
       boxShadow: "0px 0px 0px 0px",
       height: 90,
       paddingTop: 16,
+      paddingHorizontal: 20,
       backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg,
     },
     header: {
@@ -35,7 +49,7 @@ const _layout = () => {
     },
     addButtonContainer: {
       height: 50,
-      width: 65,
+      width: 60,
       backgroundColor: isDarkTheme
         ? theme.darkColors.tabButton
         : theme.lightColors.tabButton,
@@ -106,15 +120,40 @@ const _layout = () => {
         <Tabs.Screen
           name="index"
           options={{
-            title: "View Track",
+            title: "Track Pacer",
             tabBarIcon: ({ focused, color }) => (
               <Icon
                 name="home"
                 color={color}
                 strokeWidth={focused ? 0.5 : 2.5}
                 fill={focused ? color : "none"}
-                height={28}
-                width={28}
+                height={26}
+                width={26}
+              />
+            ),
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
+            ),
+          }}
+        />
+
+        {/* Challanges */}
+        <Tabs.Screen
+          name="challanges"
+          options={{
+            title: "Challanges",
+            tabBarIcon: ({ color }) => (
+              <Icon
+                name="clipboard"
+                color={color}
+                strokeWidth={2.5}
+                fill="none"
+                height={26}
+                width={26}
               />
             ),
             tabBarButton: (props) => (
@@ -131,7 +170,7 @@ const _layout = () => {
         <Tabs.Screen
           name="add"
           options={{
-            title: "Add",
+            title: "New Workout",
             tabBarButton: (props) => (
               <Pressable
                 {...props}
@@ -150,7 +189,6 @@ const _layout = () => {
                 </Pressable>
               </View>
             ),
-            
           }}
           listeners={({ navigation }) => ({
             tabPress: (e) => e.preventDefault(),
@@ -161,14 +199,40 @@ const _layout = () => {
         <Tabs.Screen
           name="presets"
           options={{
-            title: "View Presets",
+            title: "Workouts",
             tabBarIcon: ({ color }) => (
               <Icon
                 name="list"
                 color={color}
                 strokeWidth={2.5}
-                height={28}
-                width={28}
+                height={26}
+                width={26}
+              />
+            ),
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
+            ),
+          }}
+        />
+
+        {/* Profile */}
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            headerRight: () => <SettingsButton isDarkTheme={isDarkTheme} />,
+            tabBarIcon: ({ focused, color }) => (
+              <Icon
+                name="profile"
+                color={color}
+                strokeWidth={focused ? 0.5 : 2.5}
+                fill={focused ? color : "none"}
+                height={26}
+                width={26}
               />
             ),
             tabBarButton: (props) => (

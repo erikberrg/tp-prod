@@ -3,6 +3,9 @@ export const theme = {
       primary: "#512698",
       secondary: "#FFC82E",
       transparent: "transparent",
+      stop: "#FF3B30",
+      start: "#4CD964",
+      blue : "#007AFF",
     },
     lightColors: {
       bg: "#F9FAFB",

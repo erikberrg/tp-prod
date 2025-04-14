@@ -6,7 +6,10 @@ import { AnimationProvider } from "../components/AnimationContext";
 import { theme } from "../constants/theme";
 import { TouchableOpacity, useColorScheme, Text } from "react-native";
 import { useNavigation } from "expo-router";
-import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -17,9 +20,17 @@ const HeaderLeftButton = ({ isDarkTheme }) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
-     style={{ marginLeft: 6 }} onPress={() => navigation.goBack()}
+      style={{ marginLeft: 6 }}
+      onPress={() => navigation.goBack()}
     >
-      <Text style={{color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontSize: 18}}>Cancel</Text>
+      <Text
+        style={{
+          color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+          fontSize: 18,
+        }}
+      >
+        Close
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -29,35 +40,64 @@ const _layout = () => {
   const isDarkTheme = colorScheme === "dark";
 
   return (
-      <AnimationProvider>
-        <Stack screenOptions={{contentStyle: {backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg}}}>
-          {/* Main App */}
-          <Stack.Screen
-            name="(main)"
-            options={{
-              headerShown: false,
-            }}
-          />
+    <AnimationProvider>
+      <Stack
+        screenOptions={{
+          contentStyle: {
+            backgroundColor: isDarkTheme
+              ? theme.darkColors.bg
+              : theme.lightColors.bg,
+          },
+        }}
+      >
+        {/* Main App */}
+        <Stack.Screen
+          name="(main)"
+          options={{
+            headerShown: false,
+          }}
+        />
 
-          {/* Modal Screen */}
-          <Stack.Screen
-            name="Modal"
-            options={({ route }) => ({
-              presentation: "modal",
-              title: "New",
-              headerShadowVisible: false,
-              headerTintColor: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
-              headerStyle: {
-                backgroundColor: isDarkTheme
-                  ? theme.darkColors.modalBg
-                  : theme.lightColors.modalBg,
-              },
-              headerTitleAlign: "center",
-              headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
-            })}
-          />
-        </Stack>
-      </AnimationProvider>
+        {/* Modal Screen */}
+        <Stack.Screen
+          name="Modal"
+          options={({ route }) => ({
+            presentation: "modal",
+            title: "New Workout",
+            headerShadowVisible: false,
+            headerTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            headerStyle: {
+              backgroundColor: isDarkTheme
+                ? theme.darkColors.modalBg
+                : theme.lightColors.modalBg,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
+          })}
+        />
+        {/* Settings Screen */}
+        <Stack.Screen
+          name="settings"
+          options={({ route }) => ({
+            presentation: "modal",
+            title: "Settings",
+            headerShadowVisible: false,
+            headerTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            headerStyle: {
+              backgroundColor: isDarkTheme
+                ? theme.darkColors.modalBg
+                : theme.lightColors.modalBg,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
+          })}
+        />
+      </Stack>
+    </AnimationProvider>
   );
 };
 

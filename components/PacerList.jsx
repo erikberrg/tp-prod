@@ -12,6 +12,7 @@ import {
 import PacerItem from "./PacerItem";
 import { theme } from "../constants/theme";
 import Icon from "../assets/icons";
+import WeeklyPacer from "./WeeklyPacer";
 
 export default function PacerList({ pacers, onStart, onDelete }) {
   const colorScheme = useColorScheme();
@@ -111,6 +112,40 @@ export default function PacerList({ pacers, onStart, onDelete }) {
             }}
             value={searchText}
             onChangeText={setSearchText}
+          />
+        </View>
+      </View>
+
+      <View
+        style={{
+          width: "100%",
+          height: 120,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginVertical: 10,
+        }}
+      >
+        <View
+          style={{
+            width: "90%",
+            flex: 1,
+            borderRadius: 18,
+            borderWidth: 0.6,
+            borderColor: isDarkTheme
+              ? theme.darkColors.border
+              : theme.lightColors.border,
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: isDarkTheme
+              ? theme.darkColors.tabButton
+              : theme.lightColors.tabButton,
+          }}
+        >
+          <WeeklyPacer
+            onStart={(pacer) => {
+              onStart(pacer); // Forward pacer data correctly
+            }}
           />
         </View>
       </View>

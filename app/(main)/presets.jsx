@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import PacerList from "../../components/PacerList";
 import NoPacers from "../../components/NoPacers";
 import bleHelper from "../../helpers/ble";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, StyleSheet, useColorScheme } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -19,6 +19,7 @@ import {
   calculateDuration,
 } from "../../helpers/calculations";
 import { theme } from "../../constants/theme";
+import { MODES } from "../../constants/modes";
 
 export default function ViewPresets() {
   const colorScheme = useColorScheme();
@@ -26,6 +27,7 @@ export default function ViewPresets() {
   const router = useRouter();
   const { setAnimationColor, startAnimation } = useAnimationContext();
   const [pacers, setPacers] = useState([]);
+  const [mode, setMode] = useState(MODES.BLUETOOTH);
 
   // Styles
   const styles = StyleSheet.create({
@@ -80,6 +82,12 @@ export default function ViewPresets() {
     }
   };
 
+  useEffect(() => {
+    AsyncStorage.getItem("runMode").then((saved) => {
+      if (saved) setMode(saved);
+    });
+  }, []);
+
   // Bluetooth connection helper
   const connectBluetooth = async () => {
     if (!bleHelper.device) {
@@ -87,10 +95,50 @@ export default function ViewPresets() {
     }
   };
 
+  const updatePacerStats = async (pacer) => {
+    try {
+      const totalRuns = await AsyncStorage.getItem("totalRuns");
+      const totalDistance = await AsyncStorage.getItem("totalDistance");
+
+      const runs = parseInt(totalRuns) || 0;
+      const distance = parseInt(totalDistance) || 0;
+
+      const runDistance = pacer.distance * (pacer.repetitions || 1); // default to 1 rep
+
+      await AsyncStorage.setItem("totalRuns", (runs + 1).toString());
+      await AsyncStorage.setItem(
+        "totalDistance",
+        (distance + runDistance).toString()
+      );
+    } catch (err) {
+      console.error("Failed to update stats", err);
+    }
+  };
+
+  const completeChallenge = async (pacer) => {
+    try {
+      const stored = await AsyncStorage.getItem("completedBadges");
+      const completed = stored ? JSON.parse(stored) : [];
+
+      if (!completed.includes(pacer.id)) {
+        completed.push(pacer.id);
+        await AsyncStorage.setItem(
+          "completedBadges",
+          JSON.stringify(completed)
+        );
+      }
+    } catch (err) {
+      console.error("Error saving completed badge:", err);
+    }
+  };
+
   // Start pacer helper
   const startPacerAnimation = async (pacer) => {
     await Promise.all([
-      bleHelper.sendPacer(pacer.color, calculateDuration(pacer.minutes, pacer.seconds)),
+      bleHelper.sendPacer(
+        pacer.color,
+        calculateDuration(pacer.minutes, pacer.seconds)
+      ),
       bleHelper.sendTest(
         pacer.color,
         pacer.minutes,
@@ -110,31 +158,64 @@ export default function ViewPresets() {
 
   // Start pacer
   const handleStart = async (pacer) => {
-    try {
-      await connectBluetooth();
-      await startPacerAnimation(pacer);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
-      router.push("/(main)");
-      Toast.show({
-        type: "pacerToast",
-        position: "bottom",
-        bottomOffset: 100,
-        visibilityTime: calculateDuration(pacer.minutes, pacer.seconds),
-        autoHide: true,
-        swipeable: false,
-      });
-    } catch (error) {
-      Toast.show({
-        type: "bluetoothToast",
-        text1: "Bluetooth",
-        text2: "Not Connected",
-        position: "top",
-        topOffset: 60,
-        visibilityTime: 4000,
-        autoHide: true,
-        swipeable: true,
-      });
-      console.log("start " + pacer.color + "(hex) " + calculateDuration(pacer.minutes, pacer.seconds) + "(duration in millisec) " + pacer.distance + "(distance in meters) " + pacer.repetitions + "(repetitions int) " + (pacer.delay * 1000) + "(delay in millisec)");
+    if (mode === MODES.BLUETOOTH) {
+      try {
+        await connectBluetooth();
+        await startPacerAnimation(pacer);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
+        router.push("/(main)");
+        Toast.show({
+          type: "pacerToast",
+          position: "bottom",
+          bottomOffset: 100,
+          visibilityTime: calculateDuration(pacer.minutes, pacer.seconds),
+          autoHide: true,
+          swipeable: false,
+        });
+      } catch (error) {
+        Toast.show({
+          type: "bluetoothToast",
+          text1: "Bluetooth",
+          text2: "Not Connected",
+          position: "top",
+          topOffset: 60,
+          visibilityTime: 4000,
+          autoHide: true,
+          swipeable: true,
+        });
+        completeChallenge(pacer);
+        updatePacerStats(pacer);
+        console.log(
+          "start " +
+            pacer.color +
+            "(hex) " +
+            calculateDuration(pacer.minutes, pacer.seconds) +
+            "(duration in millisec) " +
+            pacer.distance +
+            "(distance in meters) " +
+            pacer.repetitions +
+            "(repetitions int) " +
+            pacer.delay * 1000 +
+            "(delay in millisec)"
+        );
+      }
+    } else {
+      console.log(
+        "start " +
+          pacer.color +
+          "(hex) " +
+          calculateDuration(pacer.minutes, pacer.seconds) +
+          "(duration in millisec) " +
+          pacer.distance +
+          "(distance in meters) " +
+          pacer.repetitions +
+          "(repetitions int) " +
+          pacer.delay * 1000 +
+          "(delay in millisec)"
+      );
+      completeChallenge(pacer);
+      updatePacerStats(pacer);
+      router.push({ pathname: "/", params: { pacer: JSON.stringify(pacer) } });
     }
   };
 

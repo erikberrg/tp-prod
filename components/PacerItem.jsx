@@ -6,16 +6,16 @@ import {
   useColorScheme,
   TouchableOpacity,
 } from "react-native";
-import Button from "../components/ui/Button";
 import Icon from "../assets/icons";
-import { theme } from "../constants/theme";
 import Divider from "../components/ui/Divider";
 import Loading from "../components/ui/Loading";
+import { theme } from "../constants/theme";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   interpolate,
+  Easing,
 } from "react-native-reanimated";
 
 export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
@@ -33,8 +33,10 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
 
   const [loading, setLoading] = useState(false);
 
+  // Animations
   const slideOffset = useSharedValue(editMode ? -36 : 0);
   const deleteOpacity = useSharedValue(editMode ? 1 : 0);
+  const buttonWidth = useSharedValue(70);
 
   useEffect(() => {
     slideOffset.value = withTiming(editMode ? -36 : 0, { duration: 200 });
@@ -53,6 +55,27 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
       },
     ],
   }));
+
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    width: withTiming(buttonWidth.value, {
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+    }),
+  }));
+
+  const handleStart = () => {
+    setTimeout(() => {
+      setLoading(true);
+      buttonWidth.value = 35;
+    }, 50);
+
+    onStart();
+
+    setTimeout(() => {
+      setLoading(false);
+      buttonWidth.value = 70;
+    }, 4000);
+  };
 
   return (
     <View style={{ width: "100%", display: "flex", flexDirection: "column" }}>
@@ -98,11 +121,10 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
           </View>
 
           <View style={styles.actionGroup}>
-            {loading ? (
-              <View
-                style={{
+            <Animated.View
+              style={[
+                {
                   height: 35,
-                  width: 70,
                   justifyContent: "center",
                   alignItems: "center",
                   backgroundColor: isDarkTheme
@@ -113,23 +135,51 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
                     ? theme.darkColors.border
                     : theme.lightColors.border,
                   borderRadius: theme.radius.xl,
-                }}
-              >
+                  overflow: "hidden",
+                },
+                animatedButtonStyle,
+              ]}
+            >
+              {loading ? (
                 <Loading />
-              </View>
-            ) : (
-              <Button
-                title="Start"
-                hasShadow={false}
-                textStyle={[
-                  { fontWeight: "bold", fontSize: 14 },
-                  isDarkTheme
-                    ? { color: theme.darkColors.buttonText }
-                    : { color: theme.lightColors.buttonText },
-                ]}
-                buttonStyle={{
+              ) : (
+                <TouchableOpacity
+                  onPress={handleStart}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 14,
+                      color: isDarkTheme
+                        ? theme.darkColors.buttonText
+                        : theme.lightColors.buttonText,
+                    }}
+                  >
+                    Start
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                styles.deleteButtonWrapper,
+                { position: "absolute", left: 76 },
+                deleteButtonStyle,
+              ]}
+            >
+              <TouchableOpacity
+                onPress={() => onDelete(pacer.id)}
+                disabled={!editMode}
+                style={{
                   height: 35,
-                  width: 70,
+                  width: 35,
                   backgroundColor: isDarkTheme
                     ? theme.darkColors.tabButton
                     : theme.lightColors.tabButton,
@@ -137,53 +187,19 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
                   borderColor: isDarkTheme
                     ? theme.darkColors.border
                     : theme.lightColors.border,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 18,
+                  marginLeft: 8,
                 }}
-                onPress={() => {
-                  onStart();
-                  setLoading(true);
-                  setTimeout(() => {
-                    setLoading(false);
-                  }, 4000);
-                }}
-              />
-            )}
-
-            <Animated.View
-              style={[
-                styles.deleteButtonWrapper,
-                {
-                  position: "absolute",
-                  left: 76,
-                },
-                deleteButtonStyle,
-              ]}
-            >
-                <TouchableOpacity
-                  onPress={() => onDelete(pacer.id)}
-                  disabled={!editMode}
-                  style={{
-                    height: 35,
-                    width: 35,
-                    backgroundColor: isDarkTheme
-                      ? theme.darkColors.tabButton
-                      : theme.lightColors.tabButton,
-                    borderWidth: 0.5,
-                    borderColor: isDarkTheme
-                      ? theme.darkColors.border
-                      : theme.lightColors.border,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderRadius: 18,
-                    marginLeft: 8,
-                  }}
-                >
-                  <Icon
-                    name="delete"
-                    size={16}
-                    color={iconColor}
-                    fill={iconColor}
-                  />
-                </TouchableOpacity>
+              >
+                <Icon
+                  name="delete"
+                  size={16}
+                  color={iconColor}
+                  fill={iconColor}
+                />
+              </TouchableOpacity>
             </Animated.View>
           </View>
         </Animated.View>
@@ -227,7 +243,7 @@ const styles = StyleSheet.create({
   actionGroup: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     position: "relative",
     width: 70,
     height: 35,

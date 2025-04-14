@@ -1,0 +1,89 @@
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import React, { useState, useEffect } from "react";
+import { MODES } from "../constants/modes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {theme} from "../constants/theme";
+
+const settings = () => {
+  const colorScheme = useColorScheme();
+  const isDarkTheme = colorScheme === "dark";
+  const [mode, setMode] = useState(MODES.BLUETOOTH);
+
+  useEffect(() => {
+    const loadMode = async () => {
+      const savedMode = await AsyncStorage.getItem("runMode");
+      if (savedMode) setMode(savedMode);
+    };
+    loadMode();
+  }, []);
+
+  const handleModeChange = async (newMode) => {
+    setMode(newMode);
+    await AsyncStorage.setItem("runMode", newMode);
+  };
+
+  const resetProfile = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "userName",
+        "completedBadges",
+        "totalRuns",
+        "totalDistance",
+        "workoutHistory",
+      ]);
+      setName("Set Name");
+      setCompletedBadges([]);
+      setTotalRuns(0);
+      setTotalDistance(0);
+      setWorkoutHistory([]);
+      console.log("Profile reset!");
+    } catch (err) {
+      console.error("Error resetting profile:", err);
+    }
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        flexDirection: "column",
+        backgroundColor: isDarkTheme
+          ? theme.darkColors.modalBg
+          : theme.lightColors.modalBg,
+      }}
+    >
+      <View style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 16, marginTop: 10 }}>
+        <Text style={{fontSize: 16, color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text}}>Run Mode</Text>
+        <TouchableOpacity
+          onPress={() =>
+            handleModeChange(mode === MODES.GPS ? MODES.BLUETOOTH : MODES.GPS)
+          }
+          style={{
+            padding: 10,
+            backgroundColor: isDarkTheme ? theme.darkColors.sectionButton : theme.lightColors.sectionButton,
+            borderRadius: 10,
+          }}
+        >
+          <Text
+            style={{ color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontSize: 16, textAlign: "center" }}
+          >
+            {mode === MODES.GPS
+              ? "GPS"
+              : "Bluetooth"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 20, borderRadius: 16, marginTop: 10 }}>
+        <Text style={{fontSize: 16, color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontWeight: 'bold'}}>Submit Feedback</Text>
+      </View>
+      <TouchableOpacity onPress={resetProfile} style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 20, borderRadius: 16, marginTop: 10 }}>
+        <Text style={{fontSize: 16, color: theme.colors.stop, fontWeight: 'bold'}}>Reset Profile</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default settings;

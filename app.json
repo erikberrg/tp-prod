@@ -13,7 +13,8 @@
       "jsEngine": "jsc",
       "bundleIdentifier": "com.erikdberg.tpprod",
       "infoPlist": {
-        "CFBundleDisplayName": "Track Pacer"
+        "CFBundleDisplayName": "Track Pacer",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to track your runs during GPS mode."
       }
     },
     "android": {
