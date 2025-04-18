@@ -8,16 +8,20 @@ import {
 } from "react-native";
 import { theme } from "../constants/theme";
 import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    Easing,
-  } from "react-native-reanimated";
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 import Loading from "../components/ui/Loading";
+import LinearGradient from "react-native-linear-gradient";
+import Icon from "../assets/icons";
+import { useRouter } from "expo-router";
 
 export default function ProgressiveChallenge({ challenge, onStart }) {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
+  const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const buttonWidth = useSharedValue(70);
@@ -33,7 +37,7 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
     setLoading(true);
     buttonWidth.value = 35;
 
-    onStart(pacer); // Pass challenge pacer data
+    onStart(pacer);
 
     setTimeout(() => {
       setLoading(false);
@@ -46,106 +50,74 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
       style={[
         styles.container,
         {
-          borderColor: isDarkTheme
-            ? theme.darkColors.border
-            : theme.lightColors.border,
           backgroundColor: isDarkTheme
             ? theme.darkColors.tabButton
             : theme.lightColors.tabButton,
         },
       ]}
     >
-      <View
-        style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}
+      <TouchableOpacity
+        onPress={() => {
+          router.push({
+            pathname: "/challangeScreen",
+            params: { challenge: JSON.stringify(challenge) },
+          });
+        }}
       >
-        <Text style={[styles.title, { color: challenge.color }]}>
-          {challenge.title}
-        </Text>
-        <Animated.View style={[styles.actionGroup, animatedButtonStyle]}>
-              {loading ? (
-                <Loading />
-              ) : (
-                <TouchableOpacity
-                  onPress={handleStart}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: isDarkTheme
-                      ? theme.lightColors.bg
-                      : theme.darkColors.bg,
-                    borderRadius: theme.radius.xl,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: 14,
-                      color: isDarkTheme
-                        ? theme.lightColors.text
-                        : theme.darkColors.text,
-                    }}
-                  >
-                    Start
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </Animated.View>
-      </View>
-      {challenge.levels.map((level, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.levelCard,
-            {
-              backgroundColor: isDarkTheme
-                ? theme.darkColors.section
-                : theme.lightColors.bg,
-            },
-          ]}
-          onPress={() => onStart(level)}
-        >
+        <View style={styles.gradientContainer}>
+          <LinearGradient
+            colors={[`${challenge.color1}`, `${challenge.color2}`]}
+            locations={[0, 1]}
+            style={styles.gradient}
+          />
+          <Text style={styles.gtitle}>{challenge.title2}</Text>
+          <View style={styles.icon}>
+            <Icon
+              name={`${challenge.icon}`}
+              size={300}
+              color="#ffffff40"
+              strokeWidth={1.5}
+              fill={"transparent"}
+            />
+          </View>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={{}}>{challenge.title}</Text>
           <Text
             style={[
-              styles.levelTitle,
+              styles.description,
               {
                 color: isDarkTheme
-                  ? theme.darkColors.text
-                  : theme.lightColors.text,
+                  ? theme.lightColors.subtext
+                  : theme.darkColors.subtext,
               },
             ]}
           >
-            {level.title}
+            {challenge.description}
           </Text>
-          <Text
-            style={[
-              styles.levelDetails,
-              {
-                color: isDarkTheme
-                  ? theme.darkColors.subtext
-                  : theme.lightColors.subtext,
-              },
-            ]}
-          >
-            {level.distance} km • {level.minutes}:
-            {level.seconds.toString().padStart(2, "0")}
-          </Text>
-        </TouchableOpacity>
-      ))}
+          <View style={styles.difficulty}>
+            <Text style={{fontWeight: 'bold', fontSize: 18}}>{challenge.difficulty}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
-    marginVertical: 12,
-    padding: 10,
+    width: "100%",
     borderRadius: 16,
-    borderWidth: 0.6,
+    gap: 10,
     display: "flex",
     flexDirection: "column",
+    boxShadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
   actionGroup: {
     height: 35,
@@ -157,16 +129,56 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  levelCard: {
-    padding: 10,
-    marginVertical: 6,
-    borderRadius: 12,
-  },
-  levelTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  levelDetails: {
+  description: {
     fontSize: 14,
+    marginTop: 5,
+  },
+  difficulty: {
+    backgroundColor: '#fff',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    padding: 5,
+    marginTop: 10,
+  },
+  gradientContainer: {
+    position: "relative",
+    height: 250,
+    width: "100%",
+    overflow: "hidden",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
+  },
+
+  gradient: {
+    ...StyleSheet.absoluteFillObject, // cleaner way to cover container
+    zIndex: 0, // put behind icon and text
+  },
+
+  gtitle: {
+    color: "white",
+    fontSize: 40,
+    fontWeight: "bold",
+    marginBottom: 20,
+    marginLeft: 20,
+  },
+  icon: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  textContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    display: "flex",
+    flexDirection: "column",
+    gap: 5,
   },
 });

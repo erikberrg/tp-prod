@@ -5,18 +5,24 @@ import {
   StyleSheet,
   Pressable,
   useColorScheme,
+  TouchableOpacity
 } from "react-native";
 import MapView, { Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import { getDistance } from "geolib";
 import { theme } from "../constants/theme";
 import Icon from "../assets/icons";
-import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import Constants from "expo-constants";
+import LinearGradient from "react-native-linear-gradient";
+import * as Haptics from 'expo-haptics';
+import { transform } from "typescript";
 
 export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
-  const [targetDistance, setTargetDistance] = useState(pacer?.distance ?? 0);
+  const [targetDistance, setTargetDistance] = useState(
+    Number(pacer?.distance ?? 0)
+  );
   const [targetTime, setTargetTime] = useState(
     pacer?.minutes * 60 + pacer?.seconds ?? 0
   );
@@ -25,16 +31,17 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
   const [distanceRan, setDistanceRan] = useState(0);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [shouldStop, setShouldStop] = useState(false);
 
   const isRunningRef = useRef(false);
   const targetDistanceRef = useRef(targetDistance);
   const locationSub = useRef(null);
   const timerInterval = useRef(null);
+  const mapRef = useRef(null);
 
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
 
-  // Sync refs with state
   useEffect(() => {
     isRunningRef.current = isRunning;
   }, [isRunning]);
@@ -43,7 +50,14 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
     targetDistanceRef.current = targetDistance;
   }, [targetDistance]);
 
-  // Get initial location for map display
+  useEffect(() => {
+    if (shouldStop) {
+      setShouldStop(false); // reset flag
+      stopWorkout();
+      completeChallenge(pacer);
+    }
+  }, [shouldStop]);
+
   useEffect(() => {
     const getInitialLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -59,7 +73,6 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
     getInitialLocation();
   }, []);
 
-  // Start location updates
   useEffect(() => {
     const startLocationUpdates = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -79,6 +92,17 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
 
           setLocation(coords);
 
+          if (mapRef.current) {
+            mapRef.current.animateToRegion(
+              {
+                ...coords,
+                latitudeDelta: 0.0012,
+                longitudeDelta: 0.0012,
+              },
+              600
+            );
+          }
+
           if (isRunningRef.current) {
             setPath((prev) => {
               let dist = 0;
@@ -88,23 +112,17 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                 dist = getDistance(last, coords);
               }
 
+              coords.timestamp = Date.now();
+
               setDistanceRan((d) => {
                 const newDist = d + dist;
-                if (
-                  targetDistanceRef.current > 0 &&
-                  newDist >= targetDistanceRef.current * 1000
-                ) {
-                  Toast.show({
-                    type: "completeToast",
-                    position: "top",
-                    topOffset: 100,
-                    visibilityTime: 1000,
-                    autoHide: true,
-                    swipeable: true,
-                    text1: "Workout Complete",
-                    text2: `${targetDistanceRef.current} km`,
-                  });
-                  stopWorkout();
+
+                const hasReachedTarget =
+                  targetDistanceRef.current &&
+                  newDist >= targetDistanceRef.current;
+
+                if (hasReachedTarget) {
+                  setShouldStop(true);
                 }
                 return newDist;
               });
@@ -119,18 +137,33 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
     startLocationUpdates();
 
     return () => {
-      console.log("Unmounting GPSTrackerScreen");
       if (locationSub.current) locationSub.current.remove();
     };
   }, []);
 
-  // Auto-start workout if prop set
   useEffect(() => {
     if (autoStart && pacer && pacer.distance) {
       const time = pacer.minutes * 60 + pacer.seconds;
       startWorkout(pacer.distance, time);
     }
   }, [autoStart, pacer]);
+
+  const completeChallenge = async (pacer) => {
+    try {
+      const stored = await AsyncStorage.getItem("completedBadges");
+      const completed = stored ? JSON.parse(stored) : [];
+
+      if (!completed.includes(pacer.id)) {
+        completed.push(pacer.id);
+        await AsyncStorage.setItem(
+          "completedBadges",
+          JSON.stringify(completed)
+        );
+      }
+    } catch (err) {
+      console.error("Error saving completed badge:", err);
+    }
+  };
 
   const startWorkout = (distance = 0, time = 0) => {
     if (timerInterval.current) clearInterval(timerInterval.current);
@@ -155,9 +188,8 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
   const stopWorkout = async () => {
     setIsRunning(false);
 
-    // Create workout object
     const workout = {
-      id: Date.now(), // unique ID
+      id: Date.now(),
       distance: distanceRan,
       time: timer,
       path,
@@ -169,9 +201,18 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
       const workouts = existingData ? JSON.parse(existingData) : [];
       workouts.unshift(workout);
       await AsyncStorage.setItem("workoutHistory", JSON.stringify(workouts));
-      console.log("Workout saved");
 
-      // 🆕 Update total distance and runs
+      Toast.show({
+        type: "completeToast",
+        position: "top",
+        topOffset: 120,
+        visibilityTime: 5000,
+        autoHide: true,
+        swipeable: true,
+        text1: "Workout Saved 🎉",
+        text2: `${(distanceRan / 1000).toFixed(2)} km in ${formatTime(timer)}`,
+      });
+
       const storedRuns = await AsyncStorage.getItem("totalRuns");
       const storedDist = await AsyncStorage.getItem("totalDistance");
 
@@ -184,7 +225,6 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
       console.error("Failed to save workout:", err);
     }
 
-    // Reset state
     setDistanceRan(0);
     setTimer(0);
     setTargetDistance(0);
@@ -200,29 +240,38 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
   const formatTime = (sec) =>
     `${Math.floor(sec / 60)}:${("0" + (sec % 60)).slice(-2)}`;
 
-  const getAveragePace = () => {
-    if (distanceRan === 0) return "0:00";
-    const paceInSeconds = timer / (distanceRan / 1000);
-    const minutes = Math.floor(paceInSeconds / 60);
-    const seconds = Math.floor(paceInSeconds % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds} min/km`;
-  };
-
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 150, // same as gradient
+          zIndex: 999,
+          overflow: "hidden",
+        }}
+      >
+        <LinearGradient
+          colors={[
+            "rgba(255,255,255,0)",
+            "rgba(255,255,255,1)",
+            "rgba(255,255,255,1)",
+          ]}
+          locations={[0, 0.4, 1]}
+          style={styles.gradient}
+        />
+      </View>
       {location && (
         <MapView
+          ref={mapRef}
           style={styles.map}
           mapType="terrain"
           showsPointsOfInterest={false}
           pitchEnabled={false}
           showsUserLocation
           followsUserLocation
-          region={{
-            ...location,
-            latitudeDelta: 0.0012,
-            longitudeDelta: 0.0012,
-          }}
         >
           {path.length > 0 && (
             <Polyline
@@ -234,31 +283,22 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
         </MapView>
       )}
 
-      <View
-        style={[
-          styles.infoBox,
-          {
-            borderColor: isDarkTheme
-              ? theme.darkColors.border
-              : theme.lightColors.border,
-          },
-        ]}
-      >
-        <BlurView
-          intensity={50}
+      <View style={styles.infoBox}>
+        <View
           style={{
             width: "100%",
             height: "100%",
-            borderRadius: 20,
-            backgroundColor: isDarkTheme ? "#00000070" : "#ffffff70",
-            padding: 20,
+            backgroundColor: isDarkTheme
+              ? theme.darkColors.bg
+              : theme.lightColors.bg,
+            padding: 14,
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          <View style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <View style={{ display: "flex", flexDirection: "row", gap: 30 }}>
             <View style={{ display: "flex", flexDirection: "column" }}>
               <Text
                 style={[
@@ -268,15 +308,16 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                       ? theme.darkColors.text
                       : theme.lightColors.text,
                     fontWeight: "bold",
-                    fontSize: 20,
+                    fontSize: 18,
                     marginBottom: 0,
                   },
                 ]}
               >
-                {(distanceRan / 1000).toFixed(2)}
-                {targetDistance && targetDistance > 0
-                  ? ` / ${(targetDistance / 1000).toFixed(2)} km`
-                  : ""}
+                {targetDistance
+                  ? (Math.max(targetDistance - distanceRan, 0) / 1000).toFixed(
+                      2
+                    )
+                  : (distanceRan / 1000).toFixed(2)}
               </Text>
               <Text
                 style={{
@@ -285,7 +326,7 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                     : theme.lightColors.subtext,
                 }}
               >
-                Kilometers
+                km
               </Text>
             </View>
 
@@ -298,15 +339,12 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                       ? theme.darkColors.text
                       : theme.lightColors.text,
                     fontWeight: "bold",
-                    fontSize: 20,
+                    fontSize: 18,
                     marginBottom: 0,
                   },
                 ]}
               >
                 {formatTime(timer)}
-                {targetTime && targetTime > 0
-                  ? ` / ${formatTime(targetTime)}`
-                  : ""}
               </Text>
               <Text
                 style={{
@@ -315,17 +353,17 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                     : theme.lightColors.subtext,
                 }}
               >
-                Time
+                time
               </Text>
             </View>
           </View>
 
           {!isRunning && (
             <View>
-              <Pressable
+              <TouchableOpacity
                 style={{
-                  width: 100,
-                  height: 45,
+                  width: 90,
+                  height: 40,
                   backgroundColor: theme.colors.blue,
                   borderRadius: 25,
                   display: "flex",
@@ -333,37 +371,61 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                   alignItems: "center",
                 }}
                 onPress={() => startWorkout()}
+                onPressIn={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                onPressOut={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                }}
               >
                 <Text
                   style={{
                     fontWeight: "bold",
-                    fontSize: 14,
+                    fontSize: 12,
                     color: theme.darkColors.text,
                   }}
                 >
                   Quick Start
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           )}
 
           {isRunning && (
-            <Pressable
+            <TouchableOpacity
               style={{
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
                 backgroundColor: theme.colors.stop,
                 borderRadius: 25,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              onPress={stopWorkout}
+              onPress={() => {
+                Toast.show({
+                  type: "messageToast",
+                  position: "top",
+                  topOffset: 110,
+                  visibilityTime: 5000,
+                  autoHide: true,
+                  swipeable: true,
+                  text1: "Press and hold to stop",
+                  text2: "touch",
+                });
+              }}
+              onPressIn={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              onLongPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                stopWorkout();
+              }}
             >
-              <Icon name="stop" color="white" strokeWidth={3} />
-            </Pressable>
+              <Icon name="stop" color="white" strokeWidth={3} height={20} />
+            </TouchableOpacity>
           )}
-        </BlurView>
+        </View>
       </View>
     </View>
   );
@@ -374,21 +436,35 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   infoBox: {
     position: "absolute",
-    bottom: 10,
+    zIndex: 1000,
+    bottom: 90,
     left: 10,
     right: 10,
     borderRadius: 20,
+    shadowColor: "rgba(0,0,0)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    boxShadow: "0px 0px 0px 0px",
     borderCurve: "continuous",
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     overflow: "hidden",
-    borderWidth: 1,
   },
   info: {
-    fontSize: 16,
+    fontSize: 12,
     marginBottom: 6,
     textAlign: "left",
+  },
+  gradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 150, // Make this taller just to be sure it's not hidden
+    zIndex: 1000, // Force it above other content
+    pointerEvents: "none",
   },
 });

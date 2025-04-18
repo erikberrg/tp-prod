@@ -5,7 +5,7 @@ import { theme } from '../constants/theme';
 const AnimationContext = createContext();
 
 export const AnimationProvider = ({ children }) => {
-  const [animationColor, setAnimationColor] = useState(theme.colors.transparent);
+  const [animationColor, setAnimationColor] = useState(theme.colors.blue);
   const animationProgress = useRef(new Animated.Value(0));
   const animationLoop = useRef(null);
 

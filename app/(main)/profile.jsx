@@ -13,8 +13,8 @@ import { theme } from "../../constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Badge from "../../components/Badge";
 import challengeData from "../../helpers/weeklyPacer.json";
-import WorkoutMapPreview from "../../components/WorkoutMapPreview";
 import Icon from "../../assets/icons";
+import { useRouter } from "expo-router";
 
 export default function profile() {
   const [name, setName] = useState("Set Name");
@@ -22,6 +22,7 @@ export default function profile() {
   const [totalDistance, setTotalDistance] = useState(0);
   const [completedBadges, setCompletedBadges] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const router = useRouter();
 
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
@@ -129,6 +130,7 @@ export default function profile() {
         backgroundColor: isDarkTheme
           ? theme.darkColors.bg
           : theme.lightColors.bg,
+        marginBottom: theme.tabBarHeight,
       }}
     >
       <ScrollView
@@ -172,6 +174,62 @@ export default function profile() {
           />
         </View>
 
+        {/* Run Stats */}
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+              },
+            ]}
+          >
+            Statistics
+          </Text>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <Text
+              style={[
+                styles.stat,
+                {
+                  color: isDarkTheme
+                    ? theme.darkColors.text
+                    : theme.lightColors.text,
+                  borderWidth: 0.6,
+                  borderColor: isDarkTheme
+                    ? theme.darkColors.border
+                    : theme.lightColors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                },
+              ]}
+            >
+              {totalRuns} Activities
+            </Text>
+            <Text
+              style={[
+                styles.stat,
+                {
+                  color: isDarkTheme
+                    ? theme.darkColors.text
+                    : theme.lightColors.text,
+                  borderWidth: 0.6,
+                  borderColor: isDarkTheme
+                    ? theme.darkColors.border
+                    : theme.lightColors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                },
+              ]}
+            >
+              {(totalDistance / 1000).toFixed(2)} Kilometers
+            </Text>
+          </View>
+        </View>
+
         {/* Badges */}
         <View style={styles.section}>
           <Text
@@ -205,61 +263,6 @@ export default function profile() {
           )}
         </View>
 
-        {/* Run Stats */}
-        <View style={styles.section}>
-          <Text
-            style={[
-              styles.label,
-              {
-                color: isDarkTheme
-                  ? theme.darkColors.text
-                  : theme.lightColors.text,
-              },
-            ]}
-          >
-            Total Runs
-          </Text>
-          <Text
-            style={[
-              styles.stat,
-              {
-                color: isDarkTheme
-                  ? theme.darkColors.text
-                  : theme.lightColors.text,
-              },
-            ]}
-          >
-            {totalRuns}
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text
-            style={[
-              styles.label,
-              {
-                color: isDarkTheme
-                  ? theme.darkColors.text
-                  : theme.lightColors.text,
-              },
-            ]}
-          >
-            Total Distance
-          </Text>
-          <Text
-            style={[
-              styles.stat,
-              {
-                color: isDarkTheme
-                  ? theme.darkColors.text
-                  : theme.lightColors.text,
-              },
-            ]}
-          >
-            {(totalDistance / 1000).toFixed(2)} Kilometers
-          </Text>
-        </View>
-
         {/* Previous Workouts */}
         <View style={styles.section}>
           <Text
@@ -272,89 +275,93 @@ export default function profile() {
               },
             ]}
           >
-            Previous Workouts
+            Previous Activities
           </Text>
           {workoutHistory.length > 0 ? (
             workoutHistory.map((workout) => (
-              <View
+              <TouchableOpacity
                 key={workout.id}
+                onPress={() => {
+                  router.push({
+                    pathname: "/workout",
+                    params: { workout: JSON.stringify(workout) },
+                  });
+                }}
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  marginBottom: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   backgroundColor: isDarkTheme
-                    ? theme.darkColors.tabButton
-                    : theme.lightColors.tabButton,
+                    ? theme.darkColors.bg
+                    : theme.lightColors.bg,
                   borderRadius: 10,
-                  borderWidth: 0.6,
-                  borderColor: isDarkTheme
-                    ? theme.darkColors.border
-                    : theme.lightColors.border,
+                  paddingHorizontal: 12,
+                  paddingVertical: 12,
+                  borderCurve: "continuous",
+                  shadowColor: "#444444",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  boxShadow: "0px 0px 0px 0px",
                 }}
               >
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: 'space-evenly', alignItems: 'center' }}>
+                <Icon name="runner" size={48} color="#000" />
                 <View
-                  style={{ display: "flex", flexDirection: "column", margin: 12 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    margin: 12,
+                  }}
                 >
                   <Text
                     style={{
                       color: isDarkTheme
                         ? theme.darkColors.subtext
                         : theme.lightColors.subtext,
-                    }}
-                  >
-                    {new Date(workout.date).toLocaleString()}
-                  </Text>
-                </View>
-                <WorkoutMapPreview path={workout.path} />
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                    margin: 12,
-                  }}
-                >
-                  <View style={{ flexDirection: "row", gap: 12 }}>
-                  <Text
-                    style={{
-                      color: isDarkTheme
-                        ? theme.darkColors.text
-                        : theme.lightColors.text,
                       fontSize: 16,
-                      fontWeight: "bold",
                     }}
                   >
-                    {(workout.distance / 1000).toFixed(2)}km
+                    {new Date(workout.date).toDateString().slice(0, 10)}{" "}
+                    {new Date(workout.date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                   <Text
                     style={{
                       color: isDarkTheme
                         ? theme.darkColors.text
                         : theme.lightColors.text,
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: "bold",
                     }}
                   >
-                    {Math.floor(workout.time / 60)}m {workout.time % 60}s
+                    {(workout.distance / 1000).toFixed(2)}km{" "}
                   </Text>
-                  </View>
-                  <TouchableOpacity
-                  onPress={() => deleteWorkout(workout.id)}
-                  style={{
-                    marginTop: 0,
-                    alignSelf: "flex-start",
-                    backgroundColor: "#ff4d4d",
-                    paddingVertical: 4,
-                    paddingHorizontal: 12,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Icon name="delete" color="white" fill="white" width="16" height="16"/>
-                </TouchableOpacity>
                 </View>
-              </View>
+                </View>
+                <TouchableOpacity
+                    onPress={() => deleteWorkout(workout.id)}
+                    style={{
+                      marginTop: 0,
+                      backgroundColor: "#ff4d4d",
+                      paddingVertical: 12,
+                      paddingHorizontal: 12,
+                      borderRadius: 14,
+                      borderCurve: "continuous",
+                    }}
+                  >
+                    <Icon
+                      name="delete"
+                      color="white"
+                      fill="white"
+                      width="16"
+                      height="16"
+                    />
+                  </TouchableOpacity>
+              </TouchableOpacity>
             ))
           ) : (
             <Text

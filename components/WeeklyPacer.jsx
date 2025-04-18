@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Icon from "../assets/icons";
-import Divider from "../components/ui/Divider";
 import Loading from "../components/ui/Loading";
 import { theme } from "../constants/theme";
 import Animated, {
@@ -100,7 +99,7 @@ export default function WeeklyPacer({ onStart }) {
                   name="trophy"
                   size={28}
                   strokeWidth={2}
-                  color={isDarkTheme ? theme.darkColors.tabButton : theme.lightColors.tabButton}
+                  color={theme.lightColors.tabButton}
                   fill="transparent"
                 />
               </View>
@@ -111,7 +110,7 @@ export default function WeeklyPacer({ onStart }) {
                     { color: subTextColor, fontSize: 10 },
                   ]}
                 >
-                  Weekly Challange
+                  Weekly Workout
                 </Text>
                 <Text style={[styles.infoTitle, { color: textColor }]}>
                   {pacer.name}

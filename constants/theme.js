@@ -19,7 +19,10 @@ export const theme = {
       sectionButton: "#E8E8E8", 
       buttonText: "#262626",
       track: "#EAEAEA",
+      trackOverlay: "#d7d7d7",
+      trackOverlayLines: "#ebe9e9",
       tabButton: "#EFEFEF",
+      trackBackground: "#f4f4f4",
       colorSelector: "#ffffff75",
     },
   
@@ -36,10 +39,12 @@ export const theme = {
       button: "#2C2C2C",
       buttonText: "#F1F1F1", 
       track: "#252525",
+      trackOverlay: "#353535",
+      trackOverlayLines: "#252525",
       tabButton: "#303030",
+      trackBackground: "#181818",
       colorSelector: "#00000075",
     },
-  
     fonts: {
       light: "400",
       medium: "500",
@@ -55,5 +60,6 @@ export const theme = {
       xl: 18,
       xxl: 22,
     },
+    tabBarHeight: 90,
   };
   

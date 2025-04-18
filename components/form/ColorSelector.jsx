@@ -6,7 +6,7 @@ export const ColorSelector = ({ selectedColor, onSelectColor }) => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const colors = [
-    "#009CDF",
+    theme.colors.blue,
     theme.colors.primary,
     "#E23838",
     "#F78200",

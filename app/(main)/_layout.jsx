@@ -1,35 +1,56 @@
 // Tab layout screen to navigate between home, add, and presets
 
-import React from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import Icon from "../../assets/icons";
 import Toaster from "../../components/Toaster";
 import * as Haptics from "expo-haptics";
+import { MODES } from "../../constants/modes"; // assuming you have this
 import { Tabs, useNavigation } from "expo-router";
 import {
-  View,
   Platform,
   Pressable,
   useColorScheme,
   StyleSheet,
   Easing,
   TouchableOpacity,
-  Text,
+  View,
 } from "react-native";
 import { theme } from "../../constants/theme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur";
+import LinearGradient from "react-native-linear-gradient";
 
 const _layout = () => {
+  useFocusEffect(
+    useCallback(() => {
+      const loadMode = async () => {
+        const savedMode = await AsyncStorage.getItem("runMode");
+        setMode(savedMode || MODES.BLUETOOTH); // fallback
+      };
+      loadMode();
+    }, [])
+  );
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const navigation = useNavigation();
+  const [mode, setMode] = useState(null); // null = loading
 
   const SettingsButton = ({ isDarkTheme }) => {
     const navigation = useNavigation();
     return (
       <TouchableOpacity
-       style={{ marginRight: 16 }} onPress={() => navigation.navigate('settings')}
+        style={{ marginRight: 12, paddingHorizontal: 12, paddingVertical: 4 }}
+        onPress={() => navigation.navigate("settings")}
       >
-        <Icon name="settings" color={isDarkTheme ? theme.darkColors.text : theme.lightColors.text} fill={"none"} size={28} strokeWidth={2} />
+        <Icon
+          name="settings"
+          color={isDarkTheme ? theme.darkColors.icon : theme.lightColors.icon}
+          fill={"none"}
+          size={20}
+          strokeWidth={2}
+        />
       </TouchableOpacity>
     );
   };
@@ -41,8 +62,13 @@ const _layout = () => {
       boxShadow: "0px 0px 0px 0px",
       height: 90,
       paddingTop: 16,
-      paddingHorizontal: 20,
+      paddingHorizontal: 32,
       backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg,
+      zIndex: 1,
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
     },
     header: {
       backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg,
@@ -121,12 +147,58 @@ const _layout = () => {
           name="index"
           options={{
             title: "Track Pacer",
+            headerStyle: {
+              backgroundColor:
+                mode === MODES.GPS
+                  ? isDarkTheme
+                    ? theme.darkColors.bg
+                    : theme.lightColors.bg
+                  : isDarkTheme
+                  ? theme.darkColors.trackBackground
+                  : theme.lightColors.trackBackground,
+            },
+            tabBarStyle: {
+              ...styles.tabBar,
+              backgroundColor:
+                mode === MODES.GPS
+                  ? isDarkTheme
+                    ? theme.darkColors.bg
+                    : "transparent"
+                  : isDarkTheme
+                  ? theme.darkColors.bg
+                  : "transparent",
+            },
             tabBarIcon: ({ focused, color }) => (
               <Icon
                 name="home"
                 color={color}
                 strokeWidth={focused ? 0.5 : 2.5}
                 fill={focused ? color : "none"}
+                height={26}
+                width={26}
+              />
+            ),
+            tabBarButton: (props) => (
+              <Pressable
+                {...props}
+                android_ripple={{ color: "transparent" }}
+                style={props.style}
+              />
+            ),
+          }}
+        />
+
+        {/* Presets */}
+        <Tabs.Screen
+          name="presets"
+          options={{
+            title: "Workouts",
+            tabBarIcon: ({ color }) => (
+              <Icon
+                name="runner"
+                color={color}
+                fill={color}
+                strokeWidth={2.5}
                 height={26}
                 width={26}
               />
@@ -152,59 +224,6 @@ const _layout = () => {
                 color={color}
                 strokeWidth={2.5}
                 fill="none"
-                height={26}
-                width={26}
-              />
-            ),
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-          }}
-        />
-
-        {/* Add */}
-        <Tabs.Screen
-          name="add"
-          options={{
-            title: "New Workout",
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-            tabBarIcon: ({ color }) => (
-              <View style={styles.addButtonContainer}>
-                <Pressable
-                  style={styles.addButton}
-                  onPressIn={handlePressIn}
-                  onPressOut={handlePressOut}
-                >
-                  <Icon name="plus" color={color} strokeWidth={2.5} />
-                </Pressable>
-              </View>
-            ),
-          }}
-          listeners={({ navigation }) => ({
-            tabPress: (e) => e.preventDefault(),
-          })}
-        />
-
-        {/* Presets */}
-        <Tabs.Screen
-          name="presets"
-          options={{
-            title: "Workouts",
-            tabBarIcon: ({ color }) => (
-              <Icon
-                name="list"
-                color={color}
-                strokeWidth={2.5}
                 height={26}
                 width={26}
               />

@@ -37,7 +37,9 @@ export default function WorkoutMapPreview({ path }) {
           longitudeDelta: lngDelta,
         }}
       >
-        <Polyline coordinates={path} strokeWidth={6} strokeColor="#007AFF" />
+        {path && path.length > 0 && (
+          <Polyline coordinates={path} strokeColor="#007AFF" strokeWidth={4} />
+        )}
       </MapView>
     </View>
   );
@@ -45,10 +47,11 @@ export default function WorkoutMapPreview({ path }) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 250,
+    height: '100%',
     overflow: "hidden",
   },
   map: {
     flex: 1,
+    marginTop: -200,
   },
 });

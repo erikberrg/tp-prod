@@ -1,60 +1,67 @@
-import { ScrollView, View, useColorScheme } from "react-native";
+import { ScrollView, View, useColorScheme, Text, Dimensions } from "react-native";
 import React from "react";
 import { theme } from "../../constants/theme";
-import WeeklyPacer from "../../components/WeeklyPacer";
-import challenges from "../../helpers/challangeData"; // adjust path if needed
+import challenges from "../../helpers/challangeData";
 import ProgressiveChallenge from "../../components/ProgressiveChallange";
 
+const ITEM_WIDTH = 330; // Width of each item including any margin/padding
 
 const challanges = () => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkTheme ? theme.darkColors.bg : theme.lightColors.bg }}>
-    <ScrollView
-      contentContainerStyle={{
+    <View
+      style={{
+        flex: 1,
         backgroundColor: isDarkTheme
           ? theme.darkColors.bg
           : theme.lightColors.bg,
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
+        marginBottom: theme.tabBarHeight,
       }}
     >
-      <View
-        style={{
-          width: "90%",
-          height: 120,
-          borderRadius: 18,
-          borderWidth: 0.6,
-          borderColor: isDarkTheme
-            ? theme.darkColors.border
-            : theme.lightColors.border,
+      <Text style={{
+        fontSize: 24,
+        fontWeight: "bold",
+        color: isDarkTheme
+          ? theme.darkColors.text
+          : theme.lightColors.text,
+        paddingHorizontal: 20,
+        marginTop: 20,
+        textAlign: "left",}}>
+        Distance
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={ITEM_WIDTH + 20}
+        decelerationRate="fast"
+        snapToAlignment="start"
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingVertical: 20,
           display: "flex",
           flexDirection: "row",
-          backgroundColor: isDarkTheme
-            ? theme.darkColors.tabButton
-            : theme.lightColors.tabButton,
-          marginVertical: 10,
+          gap: 20,
+          justifyContent: "flex-start",
         }}
       >
-        <WeeklyPacer
-          onStart={(pacer) => {
-            onStart(pacer);
-          }}
-        />
-      </View>
-      {challenges.map((challenge, index) => (
-        <ProgressiveChallenge
-          key={index}
-          challenge={challenge}
-          onStart={(pacer) => {
-            onStart(pacer);
-          }}
-        />
-      ))}
-    </ScrollView>
+        {challenges.map((challenge, index) => (
+          <View
+            key={index}
+            style={{
+              width: ITEM_WIDTH,
+            }}
+          >
+            <ProgressiveChallenge
+              challenge={challenge}
+              onStart={(pacer) => {
+                onStart(pacer);
+              }}
+            />
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 };

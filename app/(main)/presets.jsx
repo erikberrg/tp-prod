@@ -115,23 +115,6 @@ export default function ViewPresets() {
     }
   };
 
-  const completeChallenge = async (pacer) => {
-    try {
-      const stored = await AsyncStorage.getItem("completedBadges");
-      const completed = stored ? JSON.parse(stored) : [];
-
-      if (!completed.includes(pacer.id)) {
-        completed.push(pacer.id);
-        await AsyncStorage.setItem(
-          "completedBadges",
-          JSON.stringify(completed)
-        );
-      }
-    } catch (err) {
-      console.error("Error saving completed badge:", err);
-    }
-  };
-
   // Start pacer helper
   const startPacerAnimation = async (pacer) => {
     await Promise.all([
@@ -161,17 +144,10 @@ export default function ViewPresets() {
     if (mode === MODES.BLUETOOTH) {
       try {
         await connectBluetooth();
-        await startPacerAnimation(pacer);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
-        router.push("/(main)");
-        Toast.show({
-          type: "pacerToast",
-          position: "bottom",
-          bottomOffset: 100,
-          visibilityTime: calculateDuration(pacer.minutes, pacer.seconds),
-          autoHide: true,
-          swipeable: false,
-        });
+        router.push({ pathname: "/", params: { pacer: JSON.stringify(pacer) } });
+        await startPacerAnimation(pacer);
+        updatePacerStats(pacer);
       } catch (error) {
         Toast.show({
           type: "bluetoothToast",
@@ -183,38 +159,10 @@ export default function ViewPresets() {
           autoHide: true,
           swipeable: true,
         });
-        completeChallenge(pacer);
-        updatePacerStats(pacer);
-        console.log(
-          "start " +
-            pacer.color +
-            "(hex) " +
-            calculateDuration(pacer.minutes, pacer.seconds) +
-            "(duration in millisec) " +
-            pacer.distance +
-            "(distance in meters) " +
-            pacer.repetitions +
-            "(repetitions int) " +
-            pacer.delay * 1000 +
-            "(delay in millisec)"
-        );
       }
     } else {
-      console.log(
-        "start " +
-          pacer.color +
-          "(hex) " +
-          calculateDuration(pacer.minutes, pacer.seconds) +
-          "(duration in millisec) " +
-          pacer.distance +
-          "(distance in meters) " +
-          pacer.repetitions +
-          "(repetitions int) " +
-          pacer.delay * 1000 +
-          "(delay in millisec)"
-      );
-      completeChallenge(pacer);
       updatePacerStats(pacer);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
       router.push({ pathname: "/", params: { pacer: JSON.stringify(pacer) } });
     }
   };
@@ -227,6 +175,7 @@ export default function ViewPresets() {
           backgroundColor: isDarkTheme
             ? theme.darkColors.bg
             : theme.lightColors.bg,
+          marginBottom: theme.tabBarHeight,
         },
       ]}
     >

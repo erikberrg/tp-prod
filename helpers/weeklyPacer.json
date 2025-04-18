@@ -1,27 +1,15 @@
 [
     {
-      "week": "2025-04-14",
-      "id": "weekly-02",
+      "week": "2025-04-21",
+      "id": "weekly-03",
       "name": "Stevie's Sprints",
       "icon": "trophy",
       "color": "#512698",
       "distance": 200,
       "minutes": 0,
-      "seconds": 32,
-      "repetitions": 5,
-      "delay": 30
-    },
-    {
-      "week": "2025-04-21",
-      "id": "weekly-03",
-      "name": "Morning Grinder",
-      "icon": "trophy",
-      "color": "#F39C12",
-      "distance": 400,
-      "minutes": 1,
-      "seconds": 10,
-      "repetitions": 2,
-      "delay": 60
+      "seconds": 40,
+      "repetitions": 3,
+      "delay": 10
     },
     {
       "week": "2025-04-28",

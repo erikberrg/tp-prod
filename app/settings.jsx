@@ -2,12 +2,17 @@ import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MODES } from "../constants/modes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {theme} from "../constants/theme";
+import { theme } from "../constants/theme";
 
 const settings = () => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const [mode, setMode] = useState(MODES.BLUETOOTH);
+  const [name, setName] = useState("Set Name");
+  const [completedBadges, setCompletedBadges] = useState([]);
+  const [totalRuns, setTotalRuns] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
+  const [workoutHistory, setWorkoutHistory] = useState([]);
 
   useEffect(() => {
     const loadMode = async () => {
@@ -55,34 +60,155 @@ const settings = () => {
           : theme.lightColors.modalBg,
       }}
     >
-      <View style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 16, marginTop: 10 }}>
-        <Text style={{fontSize: 16, color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text}}>Run Mode</Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "90%",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: isDarkTheme
+            ? theme.darkColors.section
+            : theme.lightColors.bg,
+          paddingHorizontal: 12,
+          paddingVertical: 12,
+          borderRadius: 16,
+          marginTop: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+          }}
+        >
+          Run Mode
+        </Text>
         <TouchableOpacity
           onPress={() =>
             handleModeChange(mode === MODES.GPS ? MODES.BLUETOOTH : MODES.GPS)
           }
           style={{
             padding: 10,
-            backgroundColor: isDarkTheme ? theme.darkColors.sectionButton : theme.lightColors.sectionButton,
+            backgroundColor: isDarkTheme
+              ? theme.darkColors.sectionButton
+              : theme.lightColors.sectionButton,
             borderRadius: 10,
           }}
         >
           <Text
-            style={{ color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontSize: 16, textAlign: "center" }}
+            style={{
+              color: isDarkTheme
+                ? theme.darkColors.text
+                : theme.lightColors.text,
+              fontSize: 16,
+              textAlign: "center",
+            }}
           >
-            {mode === MODES.GPS
-              ? "GPS"
-              : "Bluetooth"}
+            {mode === MODES.GPS ? "GPS" : "Bluetooth"}
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 20, borderRadius: 16, marginTop: 10 }}>
-        <Text style={{fontSize: 16, color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text, fontWeight: 'bold'}}>Submit Feedback</Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "90%",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: isDarkTheme
+            ? theme.darkColors.section
+            : theme.lightColors.bg,
+          paddingHorizontal: 12,
+          paddingVertical: 12,
+          borderRadius: 16,
+          marginTop: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+          }}
+        >
+          Measurement
+        </Text>
+        <TouchableOpacity
+          onPress={() =>
+            handleModeChange(mode === MODES.KILOMETER ? MODES.MILE : MODES.KILOMETER)
+          }
+          style={{
+            padding: 10,
+            backgroundColor: isDarkTheme
+              ? theme.darkColors.sectionButton
+              : theme.lightColors.sectionButton,
+            borderRadius: 10,
+          }}
+        >
+          <Text
+            style={{
+              color: isDarkTheme
+                ? theme.darkColors.text
+                : theme.lightColors.text,
+              fontSize: 16,
+              textAlign: "center",
+            }}
+          >
+            {mode === MODES.KILOMETER ? "Kilometers" : "Miles"}
+          </Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={resetProfile} style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkTheme ? theme.darkColors.section : theme.lightColors.bg, paddingHorizontal: 12, paddingVertical: 20, borderRadius: 16, marginTop: 10 }}>
-        <Text style={{fontSize: 16, color: theme.colors.stop, fontWeight: 'bold'}}>Reset Profile</Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "90%",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: isDarkTheme
+            ? theme.darkColors.section
+            : theme.lightColors.bg,
+          paddingHorizontal: 12,
+          paddingVertical: 20,
+          borderRadius: 16,
+          marginTop: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
+            fontWeight: "bold",
+          }}
+        >
+          Submit Feedback
+        </Text>
+      </View>
+      <TouchableOpacity
+        onPress={resetProfile}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "90%",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: isDarkTheme
+            ? theme.darkColors.section
+            : theme.lightColors.bg,
+          paddingHorizontal: 12,
+          paddingVertical: 20,
+          borderRadius: 16,
+          marginTop: 10,
+        }}
+      >
+        <Text
+          style={{ fontSize: 16, color: theme.colors.stop, fontWeight: "bold" }}
+        >
+          Reset Profile
+        </Text>
       </TouchableOpacity>
     </View>
+    
   );
 };
 

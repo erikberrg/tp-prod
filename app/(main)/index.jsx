@@ -32,7 +32,7 @@ const index = () => {
       {mode === MODES.GPS ? (
         <GPSTrackerScreen pacer={parsedPacer} autoStart={true} />
       ) : (
-        <TrackView />
+        <TrackView pacer={parsedPacer} autoStart={true} />
       )}
     </>
   );

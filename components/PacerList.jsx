@@ -21,35 +21,65 @@ export default function PacerList({ pacers, onStart, onDelete }) {
   const iconColor = isDarkTheme
     ? theme.darkColors.icon
     : theme.lightColors.icon;
+  const headerColor = isDarkTheme
+    ? theme.darkColors.subtext
+    : theme.lightColors.subtext;
   const [editMode, setEditMode] = useState(false);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
+        <View
           style={{
-            marginHorizontal: 12,
             display: "flex",
+            flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
-            paddingHorizontal: 12,
-            paddingVertical: 4,
           }}
-          onPress={() => setEditMode((prev) => !prev)}
         >
-          <Text
+          <TouchableOpacity
             style={{
-              fontSize: 18,
-              color: isDarkTheme
-                ? theme.darkColors.text
-                : theme.lightColors.text,
-              fontWeight: editMode ? "600" : "400",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 4,
+            }}
+            onPress={() => setEditMode((prev) => !prev)}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                color: isDarkTheme
+                  ? theme.darkColors.subtext
+                  : theme.lightColors.subtext,
+                fontWeight: editMode ? "600" : "400",
+              }}
+            >
+              {editMode ? "Done" : "Edit"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              marginHorizontal: 12,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+            }}
+            onPress={() => {
+              navigation.navigate("Modal");
             }}
           >
-            {editMode ? "Done" : "Edit"}
-          </Text>
-        </TouchableOpacity>
+            <Icon
+              name="plus"
+              height="20"
+              strokeWidth={2}
+              color={headerColor}
+            />
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation, editMode, isDarkTheme]);
@@ -79,7 +109,7 @@ export default function PacerList({ pacers, onStart, onDelete }) {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: isDarkTheme
-              ? theme.darkColors.tabButton
+              ? theme.darkColors.section
               : theme.lightColors.tabButton,
             color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text,
             borderRadius: 16,
@@ -138,7 +168,7 @@ export default function PacerList({ pacers, onStart, onDelete }) {
             display: "flex",
             flexDirection: "row",
             backgroundColor: isDarkTheme
-              ? theme.darkColors.tabButton
+              ? theme.darkColors.section
               : theme.lightColors.tabButton,
           }}
         >

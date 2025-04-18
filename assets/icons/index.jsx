@@ -17,6 +17,9 @@ import Trophy from './Trophy';
 import Profile from './Profile';
 import Clipboard from './Clipboard';
 import Settings from './Settings';
+import Runner from './Runner';
+import ArrowLeft from './Arrow';
+import Touch from './Touch';
 
 const icons = {
     home: Home,
@@ -33,7 +36,10 @@ const icons = {
     trophy: Trophy,
     profile: Profile,
     clipboard: Clipboard,
-    settings: Settings
+    settings: Settings,
+    runner: Runner,
+    arrowLeft: ArrowLeft,
+    touch: Touch
 }
 
 const Icon = ({name, ...props}) => {

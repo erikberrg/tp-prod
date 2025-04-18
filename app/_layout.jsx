@@ -96,6 +96,47 @@ const _layout = () => {
             headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
           })}
         />
+
+        {/* Workout Screen */}
+        <Stack.Screen
+          name="workout"
+          options={({ route }) => ({
+            title: "Workout",
+            headerShown: false,
+            headerShadowVisible: false,
+            headerTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            headerStyle: {
+              backgroundColor: isDarkTheme
+                ? theme.darkColors.bg
+                : theme.lightColors.bg,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
+          })}
+        />
+
+        {/* Challenge */}
+        <Stack.Screen
+          name="challangeScreen"
+          options={({ route }) => ({
+            presentation: "modal",
+            title: "Challange",
+            headerShown: false,
+            headerShadowVisible: false,
+            headerTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            headerStyle: {
+              backgroundColor: isDarkTheme
+                ? theme.darkColors.bg
+                : theme.lightColors.bg,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
+          })}
+        />
       </Stack>
     </AnimationProvider>
   );

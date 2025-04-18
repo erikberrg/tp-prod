@@ -1,21 +1,39 @@
 const challenges = [
   {
-    title: "10K Push Challenge",
-    color: "#FF6B6B",
-    levels: [
-      { title: "Level 1: 2 Mile Warm-Up", distance: 3.2, minutes: 24, seconds: 0 },
-      { title: "Level 2: 5K Pace Run", distance: 5, minutes: 30, seconds: 0 },
-      { title: "Level 3: 8K Builder", distance: 8, minutes: 50, seconds: 0 },
-      { title: "Level 4: 10K Final Push", distance: 10, minutes: 65, seconds: 0 },
-    ],
+    title: "5 Kilometer Challange",
+    title2: "5 Kilometers",
+    description: "A 5 km challenge to test your endurance and speed.",
+    difficulty: "View",
+    color1: "#7AAAFF",
+    color2: "#007AFF",
+    icon: 'shoe',
   },
   {
-    title: "5K Race Day",
-    color: "#4ECDC4",
-    levels: [
-      { title: "Level 1: Easy 2K", distance: 2, minutes: 12, seconds: 0 },
-      { title: "Level 2: Hard 5K", distance: 3, minutes: 22, seconds: 0 },
-    ],
+    title: "10 Kilometer Challange",
+    title2: "10 Kilometers",
+    description: "A 10 km challenge to test your endurance and speed.",
+    difficulty: "View",
+    color1: "#80FF72",
+    color2: "#7ECCCA",
+    icon: 'shoe',
+  },
+  {
+    title: "15 Kilometer Challange",
+    title2: "15 Kilometers",
+    description: "A 15 km challenge to test your endurance and speed.",
+    difficulty: "View",
+    color1: "#FF00FF",
+    color2: "#990099",
+    icon: 'shoe',
+  },
+  {
+    title: "20 Kilometer Challange",
+    title2: "20 Kilometers",
+    description: "A 20 km challenge to test your endurance and speed.",
+    difficulty: "View",
+    color1: "#FFFF00",
+    color2: "#CC9900",
+    icon: 'shoe',
   },
 ];
 
