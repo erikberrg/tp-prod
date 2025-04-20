@@ -26,6 +26,9 @@ export default function profile() {
 
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
+  const iconColor = isDarkTheme
+    ? theme.darkColors.icon
+    : theme.lightColors.icon;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -263,7 +266,7 @@ export default function profile() {
           )}
         </View>
 
-        {/* Previous Workouts */}
+        {/* Previous Activities */}
         <View style={styles.section}>
           <Text
             style={[
@@ -295,72 +298,78 @@ export default function profile() {
                   backgroundColor: isDarkTheme
                     ? theme.darkColors.bg
                     : theme.lightColors.bg,
-                  borderRadius: 10,
+                  borderWidth: 0.6,
+                  borderColor: isDarkTheme
+                    ? theme.darkColors.border
+                    : theme.lightColors.border,
+                  borderRadius: 22,
                   paddingHorizontal: 12,
                   paddingVertical: 12,
                   borderCurve: "continuous",
-                  shadowColor: "#444444",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 8,
-                  boxShadow: "0px 0px 0px 0px",
                 }}
               >
-                <View style={{ display: "flex", flexDirection: "row", justifyContent: 'space-evenly', alignItems: 'center' }}>
-                <Icon name="runner" size={48} color="#000" />
                 <View
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    margin: 12,
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                    alignItems: "center",
                   }}
                 >
-                  <Text
+                  <Icon name="runner" size={48} color={iconColor} fill="none" />
+                  <View
                     style={{
-                      color: isDarkTheme
-                        ? theme.darkColors.subtext
-                        : theme.lightColors.subtext,
-                      fontSize: 16,
+                      display: "flex",
+                      flexDirection: "column",
+                      margin: 12,
                     }}
                   >
-                    {new Date(workout.date).toDateString().slice(0, 10)}{" "}
-                    {new Date(workout.date).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Text>
-                  <Text
-                    style={{
-                      color: isDarkTheme
-                        ? theme.darkColors.text
-                        : theme.lightColors.text,
-                      fontSize: 20,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {(workout.distance / 1000).toFixed(2)}km{" "}
-                  </Text>
-                </View>
+                    <Text
+                      style={{
+                        color: isDarkTheme
+                          ? theme.darkColors.subtext
+                          : theme.lightColors.subtext,
+                        fontSize: 16,
+                      }}
+                    >
+                      {new Date(workout.date).toDateString().slice(0, 10)}{" "}
+                      {new Date(workout.date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                    <Text
+                      style={{
+                        color: isDarkTheme
+                          ? theme.darkColors.text
+                          : theme.lightColors.text,
+                        fontSize: 20,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {(workout.distance / 1000).toFixed(2)}km{" "}
+                    </Text>
+                  </View>
                 </View>
                 <TouchableOpacity
-                    onPress={() => deleteWorkout(workout.id)}
-                    style={{
-                      marginTop: 0,
-                      backgroundColor: "#ff4d4d",
-                      paddingVertical: 12,
-                      paddingHorizontal: 12,
-                      borderRadius: 14,
-                      borderCurve: "continuous",
-                    }}
-                  >
-                    <Icon
-                      name="delete"
-                      color="white"
-                      fill="white"
-                      width="16"
-                      height="16"
-                    />
-                  </TouchableOpacity>
+                  onPress={() => deleteWorkout(workout.id)}
+                  style={{
+                    marginTop: 0,
+                    backgroundColor: "#ff4d4d",
+                    paddingVertical: 12,
+                    paddingHorizontal: 12,
+                    borderRadius: 14,
+                    borderCurve: "continuous",
+                  }}
+                >
+                  <Icon
+                    name="delete"
+                    color="white"
+                    fill="white"
+                    width="16"
+                    height="16"
+                  />
+                </TouchableOpacity>
               </TouchableOpacity>
             ))
           ) : (

@@ -19,7 +19,6 @@ import {
 import { theme } from "../../constants/theme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur";
 import LinearGradient from "react-native-linear-gradient";
 
 const _layout = () => {

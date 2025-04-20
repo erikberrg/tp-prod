@@ -16,15 +16,23 @@ export default {
       bundleIdentifier: "com.erikdberg.tpprod",
       infoPlist: {
         CFBundleDisplayName: "Track Pacer",
-        NSLocationWhenInUseUsageDescription: "This app uses your location to track your runs during GPS mode."
-      }
+        NSLocationWhenInUseUsageDescription: "We need your location to track your workout.",
+        NSLocationAlwaysUsageDescription: "We need your location in the background to track your run.",
+        UIBackgroundModes: ["location"]
+       }
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "com.erikdberg.tpprod"
+      package: "com.erikdberg.tpprod",
+      permissions: [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE"
+      ]
     },
     web: {
       bundler: "metro",

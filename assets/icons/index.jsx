@@ -20,6 +20,11 @@ import Settings from './Settings';
 import Runner from './Runner';
 import ArrowLeft from './Arrow';
 import Touch from './Touch';
+import WeekOne from './weekOne';
+import FiveK from './fiveK';
+import TenK from './tenK';
+import fifteenK from './fifteenK';
+import twentyK from './twentyK';
 
 const icons = {
     home: Home,
@@ -39,7 +44,12 @@ const icons = {
     settings: Settings,
     runner: Runner,
     arrowLeft: ArrowLeft,
-    touch: Touch
+    touch: Touch,
+    weekOne: WeekOne,
+    fiveK: FiveK,
+    tenK: TenK,
+    fifteenK: fifteenK,
+    twentyK: twentyK,
 }
 
 const Icon = ({name, ...props}) => {

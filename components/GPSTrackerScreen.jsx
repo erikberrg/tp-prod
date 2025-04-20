@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
   useColorScheme,
   TouchableOpacity
 } from "react-native";
@@ -17,7 +16,21 @@ import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
 import LinearGradient from "react-native-linear-gradient";
 import * as Haptics from 'expo-haptics';
-import { transform } from "typescript";
+import { startBackgroundLocation, stopBackgroundLocation } from "../helpers/locationTasks";
+import { NativeModules } from "react-native";
+const { LiveActivityManager } = NativeModules;
+
+export const startLiveActivity = (distance, time) => {
+  LiveActivityManager.startActivity(distance, time);
+};
+
+export const updateLiveActivity = (distance, time) => {
+  LiveActivityManager.updateActivity(distance, time);
+};
+
+export const endLiveActivity = () => {
+  LiveActivityManager.endActivity();
+};
 
 export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
   const [targetDistance, setTargetDistance] = useState(
@@ -88,8 +101,8 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
           const coords = {
             latitude: loc.coords.latitude,
             longitude: loc.coords.longitude,
+            timestamp: Date.now(),
           };
-
           setLocation(coords);
 
           if (mapRef.current) {
@@ -176,10 +189,13 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
     setTargetDistance(distance);
     setTargetTime(time);
 
+    startLiveActivity(`${distanceRan}`, `${timer}`);
+    startBackgroundLocation();
     const startTime = Date.now();
     timerInterval.current = setInterval(() => {
       const time = Math.floor((Date.now() - startTime) / 1000);
       setTimer(time);
+      updateLiveActivity(`${distanceRan}`, `${time}`);
     }, 1000);
 
     setIsRunning(true);
@@ -187,6 +203,8 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
 
   const stopWorkout = async () => {
     setIsRunning(false);
+    endLiveActivity();
+    stopBackgroundLocation();
 
     const workout = {
       id: Date.now(),
@@ -203,14 +221,14 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
       await AsyncStorage.setItem("workoutHistory", JSON.stringify(workouts));
 
       Toast.show({
-        type: "completeToast",
+        type: "messageToast",
         position: "top",
         topOffset: 120,
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
-        text1: "Workout Saved 🎉",
-        text2: `${(distanceRan / 1000).toFixed(2)} km in ${formatTime(timer)}`,
+        text1: "Activity Saved",
+        text2: 'runner',
       });
 
       const storedRuns = await AsyncStorage.getItem("totalRuns");
@@ -291,7 +309,8 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
             backgroundColor: isDarkTheme
               ? theme.darkColors.bg
               : theme.lightColors.bg,
-            padding: 14,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
@@ -362,7 +381,7 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
             <View>
               <TouchableOpacity
                 style={{
-                  width: 90,
+                  width: 100,
                   height: 40,
                   backgroundColor: theme.colors.blue,
                   borderRadius: 25,

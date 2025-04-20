@@ -4,18 +4,26 @@ import bleHelper from "../helpers/ble";
 import Icon from "../assets/icons";
 import LottieView from "lottie-react-native";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Animated,
-  StyleSheet,
-  View,
-  useColorScheme,
-  Text,
-  TouchableOpacity
-} from "react-native";
+import { Animated, StyleSheet, View, useColorScheme, Text } from "react-native";
 import { useAnimationContext } from "./AnimationContext";
 import { theme } from "../constants/theme";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import InfoBox from "../components/InfoBox";
+import { NativeModules } from "react-native";
+const { LiveActivityManager } = NativeModules;
+
+export const startLiveActivity = (distance, time) => {
+  LiveActivityManager.startActivity(distance, time);
+};
+
+export const updateLiveActivity = (distance, time) => {
+  LiveActivityManager.updateActivity(distance, time);
+};
+
+export const endLiveActivity = () => {
+  LiveActivityManager.endActivity();
+};
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
@@ -36,25 +44,6 @@ const styles = StyleSheet.create({
   connectionText: {
     fontSize: 16,
     fontWeight: "bold",
-  },
-  infoBox: {
-    position: "absolute",
-    bottom: 10,
-    left: 10,
-    right: 10,
-    borderRadius: 20,
-    borderCurve: "continuous",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  info: {
-    fontSize: 12,
-    marginBottom: 6,
-    width: 70,
-    textAlign: "center",
   },
 });
 
@@ -91,8 +80,26 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     }
   }, [autoStart, pacer]);
 
+    const completeChallenge = async (pacer) => {
+      try {
+        const stored = await AsyncStorage.getItem("completedBadges");
+        const completed = stored ? JSON.parse(stored) : [];
+  
+        if (!completed.includes(pacer.id)) {
+          completed.push(pacer.id);
+          await AsyncStorage.setItem(
+            "completedBadges",
+            JSON.stringify(completed)
+          );
+        }
+      } catch (err) {
+        console.error("Error saving completed badge:", err);
+      }
+    };
+
   const startWorkout = (distance, time, reps = 0, delay = 0) => {
     if (timerInterval.current) clearInterval(timerInterval.current);
+    startLiveActivity(`${distanceRan}`, `${timer}`);
 
     setTotalReps(reps);
     let currentRepNum = 1;
@@ -119,6 +126,11 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         setRemainingTime(timeLeft);
         setRemainingDistance(distanceLeft > 0 ? distanceLeft : 0);
 
+        updateLiveActivity(
+          `${(distance - distanceLeft).toFixed(0)}`, // how much ran
+          `${Math.floor(time - timeLeft)}` // elapsed time in seconds
+        );
+
         if (timeLeft <= 0) {
           clearInterval(timerInterval.current);
 
@@ -141,8 +153,8 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
             currentRepNum++;
             runRep();
           } else {
-            setIsResting(false);
-            setIsRunning(false);
+            stopWorkout();
+            completeChallenge(pacer);
           }
         }
       }, 1000);
@@ -170,18 +182,20 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     setRestCountdown(0);
     setCurrentRep(0);
     setTotalReps(0);
+    endLiveActivity();
 
     try {
       bleHelper.sendStop();
       resetAnimation();
       Toast.show({
-        type: "completeToast",
+        type: "messageToast",
         position: "top",
         topOffset: 60,
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
         text1: "Workout Ended 🎉",
+        text2: "runner",
       });
 
       const storedRuns = await AsyncStorage.getItem("totalRuns");
@@ -221,29 +235,29 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
       await connectBluetooth();
       setConnectionStatus(true);
       Toast.show({
-        type: "bluetoothToast",
+        type: "messageToast",
         position: "top",
         topOffset: 60,
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
-        text1: "Bluetooth",
-        text2: "Connected",
-      })
+        text1: "Bluetooth connected",
+        text2: "bluetooth",
+      });
     } catch (error) {
       console.error("Failed to connect:", error);
       Toast.show({
-        type: "bluetoothToast",
+        type: "messageToast",
         position: "top",
         topOffset: 60,
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
-        text1: "Bluetooth",
-        text2: "Not connected"
+        text1: "Device not connected",
+        text2: "bluetooth",
       });
     }
-  }
+  };
 
   return (
     <View
@@ -333,174 +347,18 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
           },
         ]}
       />
-      <View
-        style={{
-          position: "absolute",
-          left: 10,
-          right: 10,
-          bottom: 0,
-          justifyContent: "center",
-          alignItems: "center",
-          height: 60,
-          backgroundColor: isDarkTheme
-            ? theme.darkColors.section
-            : theme.lightColors.bg,
-          borderRadius: 16,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: isDarkTheme ? 0 : 0.1,
-          shadowRadius: 16,
-          elevation: 20, // important for Android
-          zIndex: 9999,
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingHorizontal: 14,
-        }}
-      >
-        <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-          <View style={{ display: "flex", flexDirection: "column" }}>
-            <Text
-              style={[
-                styles.info,
-                {
-                  color: isDarkTheme
-                    ? theme.darkColors.text
-                    : theme.lightColors.text,
-                  fontWeight: "bold",
-                  fontSize: 18,
-                  marginBottom: 0,
-                },
-              ]}
-            >
-              {remainingDistance.toFixed(2).padStart(5, "0")}
-            </Text>
-            <Text
-              style={{
-                color: isDarkTheme
-                  ? theme.darkColors.subtext
-                  : theme.lightColors.subtext,
-                alignSelf: "center",
-              }}
-            >
-              meters
-            </Text>
-          </View>
-
-          <View style={{ display: "flex", flexDirection: "column" }}>
-            <Text
-              style={[
-                styles.info,
-                {
-                  color: isDarkTheme
-                    ? theme.darkColors.text
-                    : theme.lightColors.text,
-                  fontWeight: "bold",
-                  fontSize: 18,
-                  marginBottom: 0,
-                },
-              ]}
-            >
-              {formatTime(remainingTime)}
-            </Text>
-            <Text
-              style={{
-                color: isDarkTheme
-                  ? theme.darkColors.subtext
-                  : theme.lightColors.subtext,
-                alignSelf: "center",
-              }}
-            >
-              time
-            </Text>
-          </View>
-
-          {isRunning && (
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={[
-                  styles.info,
-                  {
-                    color: isDarkTheme
-                      ? theme.darkColors.text
-                      : theme.lightColors.text,
-                    fontWeight: "bold",
-                    fontSize: 18,
-                    marginBottom: 0,
-                  },
-                ]}
-              >
-                {isResting
-                  ? `${restCountdown.toString().padStart(1, "0")}`
-                  : `${currentRep.toString().padStart(1, "0")} / ${totalReps
-                      .toString()
-                      .padStart(1, "0")}`}
-              </Text>
-              <Text
-                style={{
-                  color: isDarkTheme
-                    ? theme.darkColors.subtext
-                    : theme.lightColors.subtext,
-                  alignSelf: "center",
-                }}
-              >
-                {isResting ? "rest" : "reps"}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {!isRunning && (
-          <View>
-            <TouchableOpacity
-              style={{
-                width: 90,
-                height: 35,
-                backgroundColor: theme.colors.blue,
-                borderRadius: 25,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => connectHelper()}
-            >
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 12,
-                  color: theme.darkColors.text,
-                }}
-              >
-                Connect
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {isRunning && (
-          <TouchableOpacity
-            style={{
-              width: 35,
-              height: 35,
-              backgroundColor: theme.colors.stop,
-              borderRadius: 25,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={stopWorkout}
-          >
-            <Icon name="stop" color="white" strokeWidth={3} height="20" />
-          </TouchableOpacity>
-        )}
-      </View>
+      <InfoBox
+        remainingDistance={remainingDistance}
+        remainingTime={remainingTime}
+        isRunning={isRunning}
+        isResting={isResting}
+        currentRep={currentRep}
+        totalReps={totalReps}
+        restCountdown={restCountdown}
+        formatTime={formatTime}
+        onConnectPress={connectHelper}
+        onStopPress={stopWorkout}
+      />
       {!connectionStatus && (
         <View style={styles.connectionStatusContainer}>
           <Icon name="bluetooth" size={36} color={iconColor} />

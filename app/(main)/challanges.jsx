@@ -4,7 +4,7 @@ import { theme } from "../../constants/theme";
 import challenges from "../../helpers/challangeData";
 import ProgressiveChallenge from "../../components/ProgressiveChallange";
 
-const ITEM_WIDTH = 330; // Width of each item including any margin/padding
+const ITEM_WIDTH = 250; // Width of each item including any margin/padding
 
 const challanges = () => {
   const colorScheme = useColorScheme();

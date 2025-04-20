@@ -1,27 +1,47 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet, Text, useColorScheme } from "react-native";
 import Icon from "../assets/icons";
+import { theme } from "../constants/theme";
 
 export default function Badge({ badge }) {
+  const colorScheme = useColorScheme();
+  const isDarkTheme = colorScheme === "dark";
+
   return (
-    <View style={[styles.badge, { backgroundColor: badge.color + "22" }]}>
-      <Icon name={badge.icon} size={20} color={badge.color} fill="transparent" />
-      <Text style={[styles.name, { color: badge.color }]}>{badge.name}</Text>
+    <View
+      style={[
+        styles.badge,
+        {
+          borderWidth: 0.6,
+          borderColor: isDarkTheme
+            ? theme.darkColors.border
+            : theme.lightColors.border,
+          backgroundColor: isDarkTheme
+            ? theme.darkColors.bg
+            : theme.lightColors.bg,
+        },
+      ]}
+    >
+      <Icon name={badge.icon} height={12} color={badge.color} />
+      <Text style={[styles.name, { color: isDarkTheme ? theme.darkColors.subtext : theme.lightColors.subtext }]}>
+        {badge.name}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   badge: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 6,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 16,
     gap: 8,
   },
-  label: {
-    fontSize: 14,
+  name: {
+    fontSize: 8,
     fontWeight: "500",
+    textTransform: "uppercase",
   },
 });

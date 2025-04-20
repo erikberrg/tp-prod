@@ -5,7 +5,6 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PacerList from "../../components/PacerList";
-import NoPacers from "../../components/NoPacers";
 import bleHelper from "../../helpers/ble";
 import React, { useState, useCallback, useEffect } from "react";
 import { View, StyleSheet, useColorScheme } from "react-native";
@@ -143,16 +142,19 @@ export default function ViewPresets() {
   const handleStart = async (pacer) => {
     if (mode === MODES.BLUETOOTH) {
       try {
-        await connectBluetooth();
+        //await connectBluetooth();
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
-        router.push({ pathname: "/", params: { pacer: JSON.stringify(pacer) } });
+        router.push({
+          pathname: "/",
+          params: { pacer: JSON.stringify(pacer) },
+        });
         await startPacerAnimation(pacer);
         updatePacerStats(pacer);
       } catch (error) {
         Toast.show({
-          type: "bluetoothToast",
-          text1: "Bluetooth",
-          text2: "Not Connected",
+          type: "messageToast",
+          text1: "Device not connected",
+          text2: "bluetooth",
           position: "top",
           topOffset: 60,
           visibilityTime: 4000,
@@ -179,15 +181,11 @@ export default function ViewPresets() {
         },
       ]}
     >
-      {pacers.length > 0 ? (
-        <PacerList
-          pacers={pacers}
-          onStart={handleStart}
-          onDelete={handleDeletePacer}
-        />
-      ) : (
-        <NoPacers onAdd={() => router.push("/Modal")} />
-      )}
+      <PacerList
+        pacers={pacers}
+        onStart={handleStart}
+        onDelete={handleDeletePacer}
+      />
     </View>
   );
 }

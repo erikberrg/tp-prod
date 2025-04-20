@@ -168,8 +168,8 @@ export default function PacerList({ pacers, onStart, onDelete }) {
             display: "flex",
             flexDirection: "row",
             backgroundColor: isDarkTheme
-              ? theme.darkColors.section
-              : theme.lightColors.tabButton,
+              ? theme.darkColors.bg
+              : theme.lightColors.bg,
           }}
         >
           <WeeklyPacer

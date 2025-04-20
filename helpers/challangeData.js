@@ -1,39 +1,52 @@
 const challenges = [
   {
-    title: "5 Kilometer Challange",
-    title2: "5 Kilometers",
-    description: "A 5 km challenge to test your endurance and speed.",
-    difficulty: "View",
-    color1: "#7AAAFF",
-    color2: "#007AFF",
-    icon: 'shoe',
+    desc2: "3 Levels",
+    title: "5 Kilometers",
+    desc: "Complete this challenge to receive the 5k badge.",
+    image: require("../assets/images/test4.png"),
+    badge: 'fiveK',
+    badgeText: '5K BADGE',
+    levels: [
+      { level: 1, distance: 1600, isCompleted: false, isLocked: false },
+      { level: 2, distance: 3200, isCompleted: false, isLocked: true },
+      { level: 3, distance: 5000, isCompleted: false, isLocked: true }
+    ]
   },
   {
-    title: "10 Kilometer Challange",
-    title2: "10 Kilometers",
-    description: "A 10 km challenge to test your endurance and speed.",
-    difficulty: "View",
-    color1: "#80FF72",
-    color2: "#7ECCCA",
-    icon: 'shoe',
+    desc2: "3 Levels",
+    title: "10 Kilometers",
+    desc: "Complete this challenge to receive the 10k badge.",
+    image: require("../assets/images/test2.png"),
+    badge: 'tenK',
+    badgeText: '10K BADGE',
+    levels: [
+      { level: 1, distance: 5000, isCompleted: false, isLocked: false },
+      { level: 2, distance: 8000, isCompleted: false, isLocked: true },
+      { level: 3, distance: 10000, isCompleted: false, isLocked: true }
+    ]
   },
   {
-    title: "15 Kilometer Challange",
-    title2: "15 Kilometers",
-    description: "A 15 km challenge to test your endurance and speed.",
-    difficulty: "View",
-    color1: "#FF00FF",
-    color2: "#990099",
-    icon: 'shoe',
+    desc2: "2 Levels",
+    title: "15 Kilometers",
+    desc: "Complete this challenge to receive the 15k badge.",
+    image: require("../assets/images/test3.png"),
+    badge: 'fifteenK',
+    badgeText: '15K BADGE',
+    levels: [
+      { level: 1, distance: 10000, isCompleted: false, isLocked: false },
+      { level: 2, distance: 15000, isCompleted: false, isLocked: true }
+    ]
   },
   {
-    title: "20 Kilometer Challange",
-    title2: "20 Kilometers",
-    description: "A 20 km challenge to test your endurance and speed.",
-    difficulty: "View",
-    color1: "#FFFF00",
-    color2: "#CC9900",
-    icon: 'shoe',
+    desc2: "1 Level",
+    title: "20 Kilometers",
+    desc: "Complete this challenge to receive the 20k badge.",
+    image: require("../assets/images/test.png"),
+    badge: 'twentyK',
+    badgeText: '20K BADGE',
+    levels: [
+      { level: 1, distance: 20000, isCompleted: false, isLocked: false },
+    ]
   },
 ];
 

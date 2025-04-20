@@ -96,11 +96,7 @@ export default function WeeklyPacer({ onStart }) {
                 ]}
               >
                 <Icon
-                  name="trophy"
-                  size={28}
-                  strokeWidth={2}
-                  color={theme.lightColors.tabButton}
-                  fill="transparent"
+                  name="weekOne"
                 />
               </View>
               <View style={{ gap: 4 }}>
@@ -151,8 +147,8 @@ export default function WeeklyPacer({ onStart }) {
                     justifyContent: "center",
                     alignItems: "center",
                     backgroundColor: isDarkTheme
-                      ? theme.lightColors.bg
-                      : theme.darkColors.bg,
+                      ? theme.darkColors.button
+                      : theme.lightColors.button,
                     borderRadius: theme.radius.xl,
                   }}
                 >
@@ -161,8 +157,8 @@ export default function WeeklyPacer({ onStart }) {
                       fontWeight: "bold",
                       fontSize: 14,
                       color: isDarkTheme
-                        ? theme.lightColors.text
-                        : theme.darkColors.text,
+                        ? theme.darkColors.text
+                        : theme.lightColors.text,
                     }}
                   >
                     Start

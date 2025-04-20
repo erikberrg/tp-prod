@@ -3,8 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   useColorScheme,
+  Image,
 } from "react-native";
 import { theme } from "../constants/theme";
 import Animated, {
@@ -13,7 +14,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import Loading from "../components/ui/Loading";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "../assets/icons";
 import { useRouter } from "expo-router";
@@ -51,12 +51,12 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
         styles.container,
         {
           backgroundColor: isDarkTheme
-            ? theme.darkColors.tabButton
-            : theme.lightColors.tabButton,
+            ? theme.darkColors.bg
+            : theme.lightColors.bg,
         },
       ]}
     >
-      <TouchableOpacity
+      <Pressable
         onPress={() => {
           router.push({
             pathname: "/challangeScreen",
@@ -65,24 +65,21 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
         }}
       >
         <View style={styles.gradientContainer}>
-          <LinearGradient
-            colors={[`${challenge.color1}`, `${challenge.color2}`]}
-            locations={[0, 1]}
-            style={styles.gradient}
+          <Image
+            source={challenge.image}
+            style={{
+              width: "100%",
+              height: "100%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              borderRadius: 16,
+            }}
           />
-          <Text style={styles.gtitle}>{challenge.title2}</Text>
-          <View style={styles.icon}>
-            <Icon
-              name={`${challenge.icon}`}
-              size={300}
-              color="#ffffff40"
-              strokeWidth={1.5}
-              fill={"transparent"}
-            />
-          </View>
+          <Text style={[styles.gtitle, {color: "#fff"}]}>{challenge.title}</Text>
         </View>
         <View style={styles.textContainer}>
-          <Text style={{}}>{challenge.title}</Text>
+          <Text>{challenge.desc2}</Text>
           <Text
             style={[
               styles.description,
@@ -93,13 +90,10 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
               },
             ]}
           >
-            {challenge.description}
+            {challenge.desc}
           </Text>
-          <View style={styles.difficulty}>
-            <Text style={{fontWeight: 'bold', fontSize: 18}}>{challenge.difficulty}</Text>
-          </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
@@ -111,13 +105,6 @@ const styles = StyleSheet.create({
     gap: 10,
     display: "flex",
     flexDirection: "column",
-    boxShadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
   },
   actionGroup: {
     height: 35,
@@ -149,8 +136,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    justifyContent: "flex-end",
-    alignItems: "flex-start",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   gradient: {
@@ -159,11 +146,9 @@ const styles = StyleSheet.create({
   },
 
   gtitle: {
-    color: "white",
-    fontSize: 40,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
-    marginLeft: 20,
+    fontStyle: "italic",
   },
   icon: {
     position: "absolute",
@@ -175,7 +160,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   textContainer: {
-    paddingHorizontal: 20,
     paddingVertical: 15,
     display: "flex",
     flexDirection: "column",

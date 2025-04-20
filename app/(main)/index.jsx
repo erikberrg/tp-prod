@@ -1,6 +1,6 @@
 // Home screen with track
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import TrackView from "../../components/TrackView";
 import { useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
