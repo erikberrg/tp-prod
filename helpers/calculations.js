@@ -8,5 +8,5 @@ export const calculateDistance = (distance) => {
 };
 
 export const calculateDuration = (minutes, seconds) => {
-  return (Number(minutes) * 60 + Number(seconds)) * 1000;
+  return (Number(minutes) * 60 + Number(seconds));
 };

@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MODES } from "../constants/modes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import challengeData from "../helpers/challangeData";
+import weeklyData from "../helpers/weeklyPacer.json";
 import { theme } from "../constants/theme";
 
 const settings = () => {
@@ -13,6 +15,9 @@ const settings = () => {
   const [totalRuns, setTotalRuns] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const challengeKeys = challengeData.map((c) => c.title); // e.g. "5 Kilometers"
+  const weeklyKeys = weeklyData.map((w) => w.id); // e.g. "weekly-03"
+  const progressKeys = [...challengeKeys, ...weeklyKeys];
 
   useEffect(() => {
     const loadMode = async () => {
@@ -26,26 +31,38 @@ const settings = () => {
     setMode(newMode);
     await AsyncStorage.setItem("runMode", newMode);
   };
-
+  
   const resetProfile = async () => {
     try {
-      await AsyncStorage.multiRemove([
+      // Dynamically collect all progress-related keys
+
+  
+      // Add in your existing static keys
+      const staticKeys = [
         "userName",
         "completedBadges",
         "totalRuns",
         "totalDistance",
         "workoutHistory",
-      ]);
+      ];
+  
+      const allKeysToRemove = [...staticKeys, ...progressKeys];
+  
+      await AsyncStorage.multiRemove(allKeysToRemove);
+  
+      // Reset in-app state
       setName("Set Name");
       setCompletedBadges([]);
       setTotalRuns(0);
       setTotalDistance(0);
       setWorkoutHistory([]);
-      console.log("Profile reset!");
+  
+      console.log("🧹 Profile and challenge progress reset!");
     } catch (err) {
       console.error("Error resetting profile:", err);
     }
   };
+  
 
   return (
     <View

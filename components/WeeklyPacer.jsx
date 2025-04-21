@@ -87,8 +87,6 @@ export default function WeeklyPacer({ onStart }) {
                 style={[
                   styles.color,
                   {
-                    backgroundColor: pacer.color,
-                    boxShadow: `0px 2px 20px ${pacer.color}40`,
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
@@ -150,12 +148,17 @@ export default function WeeklyPacer({ onStart }) {
                       ? theme.darkColors.button
                       : theme.lightColors.button,
                     borderRadius: theme.radius.xl,
+                    borderWidth: 0.6,
+                    borderColor: isDarkTheme
+                      ? theme.darkColors.border
+                      : theme.lightColors.border,
+                    overflow: "hidden",
                   }}
                 >
                   <Text
                     style={{
                       fontWeight: "bold",
-                      fontSize: 14,
+                      fontSize: 16,
                       color: isDarkTheme
                         ? theme.darkColors.text
                         : theme.lightColors.text,

@@ -130,7 +130,7 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
                   backgroundColor: isDarkTheme
                     ? theme.darkColors.button
                     : theme.lightColors.button,
-                  borderWidth: 0.5,
+                  borderWidth: 0.6,
                   borderColor: isDarkTheme
                     ? theme.darkColors.border
                     : theme.lightColors.border,
@@ -155,7 +155,7 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
                   <Text
                     style={{
                       fontWeight: "bold",
-                      fontSize: 14,
+                      fontSize: 16,
                       color: isDarkTheme
                         ? theme.darkColors.buttonText
                         : theme.lightColors.buttonText,

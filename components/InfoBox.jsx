@@ -1,8 +1,10 @@
 // components/InfoBox.js
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
-import Icon from "../assets/icons";
+import { View, Text, StyleSheet, useColorScheme } from "react-native";
 import { theme } from "../constants/theme";
+import AnimatedPressable from "./ui/AnimatedPressable";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 
 const InfoBox = ({
   remainingDistance,
@@ -34,7 +36,7 @@ const InfoBox = ({
           backgroundColor: isDarkTheme
             ? theme.darkColors.section
             : theme.lightColors.bg,
-          borderRadius: 16,
+          borderRadius: 20,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
           shadowOpacity: isDarkTheme ? 0 : 0.1,
@@ -44,20 +46,21 @@ const InfoBox = ({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingHorizontal: 14,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
         }}
       >
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row" }}>
           {/* Distance */}
-          <View style={{ alignItems: "center" }}>
+          <View style={{ alignItems: "flex-start", minWidth: 80 }}>
             <Text style={[styles.infoText, { color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text }]}>
-              {remainingDistance.toFixed(2).padStart(5, "0")}
+              {remainingDistance.toFixed(0).padStart(2, "0")}
             </Text>
             <Text style={{ color: isDarkTheme ? theme.darkColors.subtext : theme.lightColors.subtext }}>meters</Text>
           </View>
 
           {/* Time */}
-          <View style={{ alignItems: "center" }}>
+          <View style={{ alignItems: "flex-start", minWidth: 80 }}>
             <Text style={[styles.infoText, { color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text }]}>
               {formatTime(remainingTime)}
             </Text>
@@ -66,7 +69,7 @@ const InfoBox = ({
 
           {/* Reps / Rest */}
           {isRunning && (
-            <View style={{ alignItems: "center" }}>
+            <View style={{ alignItems: "flex-start", minWidth: 80 }}>
               <Text style={[styles.infoText, { color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text }]}>
                 {isResting
                   ? `${restCountdown.toString().padStart(1, "0")}`
@@ -81,19 +84,45 @@ const InfoBox = ({
 
         {/* Button */}
         {!isRunning ? (
-          <TouchableOpacity
+          <AnimatedPressable
             style={styles.connectButton}
             onPress={onConnectPress}
           >
-            <Text style={{ fontWeight: "bold", fontSize: 12, color: theme.darkColors.text }}>Connect</Text>
-          </TouchableOpacity>
+            <Text style={{ fontWeight: "bold", fontSize: 14, color: theme.darkColors.text }}>Connect</Text>
+          </AnimatedPressable>
         ) : (
-          <TouchableOpacity
-            style={styles.stopButton}
-            onPress={onStopPress}
-          >
-            <Icon name="stop" color="white" strokeWidth={3} height="20" />
-          </TouchableOpacity>
+            <AnimatedPressable
+              style={{
+                width: 100,
+                height: 40,
+                backgroundColor: theme.colors.stop,
+                borderRadius: 25,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => {
+                Toast.show({
+                  type: "messageToast",
+                  position: "top",
+                  topOffset: 60,
+                  visibilityTime: 5000,
+                  autoHide: true,
+                  swipeable: true,
+                  text1: "Press and hold to stop",
+                  text2: "touch",
+                });
+              }}
+              onPressIn={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              onLongPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                onStopPress();
+              }}
+            >
+            <Text style={{ fontWeight: "bold", fontSize: 14, color: theme.darkColors.text }}>Stop</Text>
+            </AnimatedPressable>
         )}
       </View>
     </>
@@ -107,16 +136,16 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   connectButton: {
-    width: 90,
-    height: 35,
+    width: 100,
+    height: 40,
     backgroundColor: theme.colors.blue,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
   },
   stopButton: {
-    width: 35,
-    height: 35,
+    width: 100,
+    height: 40,
     backgroundColor: theme.colors.stop,
     borderRadius: 25,
     justifyContent: "center",

@@ -1,4 +1,4 @@
-import { ScrollView, View, useColorScheme, Text, Dimensions } from "react-native";
+import { ScrollView, View, useColorScheme, Text } from "react-native";
 import React from "react";
 import { theme } from "../../constants/theme";
 import challenges from "../../helpers/challangeData";
@@ -6,7 +6,7 @@ import ProgressiveChallenge from "../../components/ProgressiveChallange";
 
 const ITEM_WIDTH = 250; // Width of each item including any margin/padding
 
-const challanges = () => {
+const challenge = () => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
 
@@ -66,4 +66,4 @@ const challanges = () => {
   );
 };
 
-export default challanges;
+export default challenge;

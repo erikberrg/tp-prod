@@ -2,7 +2,6 @@
 
 import uuid from "react-native-uuid";
 import * as Haptics from "expo-haptics";
-import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PacerList from "../../components/PacerList";
 import bleHelper from "../../helpers/ble";
@@ -11,14 +10,9 @@ import { View, StyleSheet, useColorScheme } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useAnimationContext } from "../../components/AnimationContext";
-import {
-  calculateRepetition,
-  calculateDelay,
-  calculateDistance,
-  calculateDuration,
-} from "../../helpers/calculations";
 import { theme } from "../../constants/theme";
 import { MODES } from "../../constants/modes";
+import { handleStart, startPacerAnimation } from "../../helpers/handleStart";
 
 export default function ViewPresets() {
   const colorScheme = useColorScheme();
@@ -114,61 +108,6 @@ export default function ViewPresets() {
     }
   };
 
-  // Start pacer helper
-  const startPacerAnimation = async (pacer) => {
-    await Promise.all([
-      bleHelper.sendPacer(
-        pacer.color,
-        calculateDuration(pacer.minutes, pacer.seconds)
-      ),
-      bleHelper.sendTest(
-        pacer.color,
-        pacer.minutes,
-        pacer.distance,
-        pacer.repetitions,
-        pacer.delay
-      ),
-      startAnimation(
-        calculateDuration(pacer.minutes, pacer.seconds),
-        calculateDistance(pacer.distance),
-        calculateRepetition(pacer.repetitions),
-        calculateDelay(pacer.delay)
-      ),
-    ]);
-    setAnimationColor(pacer.color);
-  };
-
-  // Start pacer
-  const handleStart = async (pacer) => {
-    if (mode === MODES.BLUETOOTH) {
-      try {
-        //await connectBluetooth();
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
-        router.push({
-          pathname: "/",
-          params: { pacer: JSON.stringify(pacer) },
-        });
-        await startPacerAnimation(pacer);
-        updatePacerStats(pacer);
-      } catch (error) {
-        Toast.show({
-          type: "messageToast",
-          text1: "Device not connected",
-          text2: "bluetooth",
-          position: "top",
-          topOffset: 60,
-          visibilityTime: 4000,
-          autoHide: true,
-          swipeable: true,
-        });
-      }
-    } else {
-      updatePacerStats(pacer);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
-      router.push({ pathname: "/", params: { pacer: JSON.stringify(pacer) } });
-    }
-  };
-
   return (
     <View
       style={[
@@ -183,7 +122,16 @@ export default function ViewPresets() {
     >
       <PacerList
         pacers={pacers}
-        onStart={handleStart}
+        onStart={async (pacer) => {
+          await handleStart({
+            pacer,
+            mode,
+            connectBluetooth,
+            updatePacerStats,
+            router,
+          });
+          await startPacerAnimation(pacer);
+        }}
         onDelete={handleDeletePacer}
       />
     </View>

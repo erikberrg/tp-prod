@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
-import { Animated, Easing } from 'react-native';
-import { theme } from '../constants/theme';
+import React, { createContext, useContext, useRef, useState, useEffect } from "react";
+import { Animated, Easing } from "react-native";
+import { theme } from "../constants/theme";
+import { setAnimationHelpers } from "../helpers/handleStart";
 
 const AnimationContext = createContext();
 
@@ -8,6 +9,14 @@ export const AnimationProvider = ({ children }) => {
   const [animationColor, setAnimationColor] = useState(theme.colors.blue);
   const animationProgress = useRef(new Animated.Value(0));
   const animationLoop = useRef(null);
+
+  // Inside the component
+  useEffect(() => {
+    setAnimationHelpers({
+      setAnimationColor,
+      startAnimation,
+    });
+  }, [setAnimationColor, startAnimation]);
 
   const startAnimation = (duration, lapCountNumber, repetitions, delay) => {
     const timePerLap = duration / lapCountNumber;
@@ -31,26 +40,26 @@ export const AnimationProvider = ({ children }) => {
     animationLoop.current.start();
   };
 
-    // Function to stop
-    const resetAnimation = () => {
-      animationProgress.current.setValue(0);
-      if (animationLoop.current) {
-        animationLoop.current.stop();
-      }
-    };
+  // Function to stop
+  const resetAnimation = () => {
+    animationProgress.current.setValue(0);
+    if (animationLoop.current) {
+      animationLoop.current.stop();
+    }
+  };
 
   return (
-<AnimationContext.Provider
-  value={{
-    startAnimation,
-    resetAnimation,
-    animationProgress,
-    animationColor,
-    setAnimationColor,
-  }}
->
-  {children}
-</AnimationContext.Provider>
+    <AnimationContext.Provider
+      value={{
+        startAnimation,
+        resetAnimation,
+        animationProgress,
+        animationColor,
+        setAnimationColor,
+      }}
+    >
+      {children}
+    </AnimationContext.Provider>
   );
 };
 

@@ -22,9 +22,9 @@ export default function Badge({ badge }) {
         },
       ]}
     >
-      <Icon name={badge.icon} height={12} color={badge.color} />
-      <Text style={[styles.name, { color: isDarkTheme ? theme.darkColors.subtext : theme.lightColors.subtext }]}>
-        {badge.name}
+<Icon name={badge.badge} height={12} color={badge.color || "#333"} />
+<Text style={[styles.name, { color: isDarkTheme ? theme.darkColors.subtext : theme.lightColors.subtext }]}>
+        {badge.badgeText}
       </Text>
     </View>
   );

@@ -3,7 +3,6 @@
 import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import Icon from "../../assets/icons";
-import Toaster from "../../components/Toaster";
 import * as Haptics from "expo-haptics";
 import { MODES } from "../../constants/modes"; // assuming you have this
 import { Tabs, useNavigation } from "expo-router";
@@ -17,7 +16,6 @@ import {
   View,
 } from "react-native";
 import { theme } from "../../constants/theme";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
 
@@ -110,161 +108,159 @@ const _layout = () => {
   };
 
   return (
-    <GestureHandlerRootView>
-      <Tabs
-        screenOptions={{
-          headerLargeTitle: true,
-          headerStyle: styles.header,
-          headerTintColor: isDarkTheme
-            ? theme.darkColors.text
-            : theme.lightColors.text,
-          tabBarShowLabel: false,
-          headerShadowVisible: false,
-          tabBarActiveTintColor: isDarkTheme
-            ? theme.darkColors.text
-            : theme.lightColors.text,
-          tabBarStyle: styles.tabBar,
-          transitionSpec: {
-            animation: "timing",
-            config: {
-              duration: 50,
-              easing: Easing.linear(Easing.ease),
+        <Tabs
+          screenOptions={{
+            headerLargeTitle: true,
+            headerStyle: styles.header,
+            headerTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            tabBarShowLabel: false,
+            headerShadowVisible: false,
+            tabBarActiveTintColor: isDarkTheme
+              ? theme.darkColors.text
+              : theme.lightColors.text,
+            tabBarStyle: styles.tabBar,
+            transitionSpec: {
+              animation: "timing",
+              config: {
+                duration: 50,
+                easing: Easing.linear(Easing.ease),
+              },
             },
-          },
-          sceneStyleInterpolator: ({ current }) => ({
-            sceneStyle: {
-              opacity: current.progress.interpolate({
-                inputRange: [-1, 0, 1],
-                outputRange: [0, 1, 0],
-              }),
-            },
-          }),
-        }}
-      >
-        {/* Home */}
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Track Pacer",
-            headerStyle: {
-              backgroundColor:
-                mode === MODES.GPS
-                  ? isDarkTheme
+            sceneStyleInterpolator: ({ current }) => ({
+              sceneStyle: {
+                opacity: current.progress.interpolate({
+                  inputRange: [-1, 0, 1],
+                  outputRange: [0, 1, 0],
+                }),
+              },
+            }),
+          }}
+        >
+          {/* Home */}
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "Track Pacer",
+              headerShown: mode === MODES.GPS ? false : true,
+              headerStyle: {
+                backgroundColor:
+                  mode === MODES.GPS
+                    ? isDarkTheme
+                      ? theme.darkColors.bg
+                      : theme.lightColors.bg
+                    : isDarkTheme
+                    ? theme.darkColors.trackBackground
+                    : theme.lightColors.trackBackground,
+              },
+              tabBarStyle: {
+                ...styles.tabBar,
+                backgroundColor:
+                  mode === MODES.GPS
+                    ? isDarkTheme
+                      ? theme.darkColors.bg
+                      : "transparent"
+                    : isDarkTheme
                     ? theme.darkColors.bg
-                    : theme.lightColors.bg
-                  : isDarkTheme
-                  ? theme.darkColors.trackBackground
-                  : theme.lightColors.trackBackground,
-            },
-            tabBarStyle: {
-              ...styles.tabBar,
-              backgroundColor:
-                mode === MODES.GPS
-                  ? isDarkTheme
-                    ? theme.darkColors.bg
-                    : "transparent"
-                  : isDarkTheme
-                  ? theme.darkColors.bg
-                  : "transparent",
-            },
-            tabBarIcon: ({ focused, color }) => (
-              <Icon
-                name="home"
-                color={color}
-                strokeWidth={focused ? 0.5 : 2.5}
-                fill={focused ? color : "none"}
-                height={26}
-                width={26}
-              />
-            ),
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-          }}
-        />
+                    : "transparent",
+              },
+              tabBarIcon: ({ focused, color }) => (
+                <Icon
+                  name="home"
+                  color={color}
+                  strokeWidth={focused ? 0.5 : 2.5}
+                  fill={focused ? color : "none"}
+                  height={26}
+                  width={26}
+                />
+              ),
+              tabBarButton: (props) => (
+                <Pressable
+                  {...props}
+                  android_ripple={{ color: "transparent" }}
+                  style={props.style}
+                />
+              ),
+            }}
+          />
 
-        {/* Presets */}
-        <Tabs.Screen
-          name="presets"
-          options={{
-            title: "Workouts",
-            tabBarIcon: ({ color }) => (
-              <Icon
-                name="runner"
-                color={color}
-                fill={color}
-                strokeWidth={2.5}
-                height={26}
-                width={26}
-              />
-            ),
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-          }}
-        />
+          {/* Presets */}
+          <Tabs.Screen
+            name="presets"
+            options={{
+              title: "Workouts",
+              tabBarIcon: ({ color }) => (
+                <Icon
+                  name="runner"
+                  color={color}
+                  fill={color}
+                  strokeWidth={2.5}
+                  height={26}
+                  width={26}
+                />
+              ),
+              tabBarButton: (props) => (
+                <Pressable
+                  {...props}
+                  android_ripple={{ color: "transparent" }}
+                  style={props.style}
+                />
+              ),
+            }}
+          />
 
-        {/* Challanges */}
-        <Tabs.Screen
-          name="challanges"
-          options={{
-            title: "Challanges",
-            tabBarIcon: ({ color }) => (
-              <Icon
-                name="clipboard"
-                color={color}
-                strokeWidth={2.5}
-                fill="none"
-                height={26}
-                width={26}
-              />
-            ),
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-          }}
-        />
+          {/* Challanges */}
+          <Tabs.Screen
+            name="challenge"
+            options={{
+              title: "Challenges",
+              tabBarIcon: ({ color }) => (
+                <Icon
+                  name="clipboard"
+                  color={color}
+                  strokeWidth={2.5}
+                  fill="none"
+                  height={26}
+                  width={26}
+                />
+              ),
+              tabBarButton: (props) => (
+                <Pressable
+                  {...props}
+                  android_ripple={{ color: "transparent" }}
+                  style={props.style}
+                />
+              ),
+            }}
+          />
 
-        {/* Profile */}
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: "Profile",
-            headerRight: () => <SettingsButton isDarkTheme={isDarkTheme} />,
-            tabBarIcon: ({ focused, color }) => (
-              <Icon
-                name="profile"
-                color={color}
-                strokeWidth={focused ? 0.5 : 2.5}
-                fill={focused ? color : "none"}
-                height={26}
-                width={26}
-              />
-            ),
-            tabBarButton: (props) => (
-              <Pressable
-                {...props}
-                android_ripple={{ color: "transparent" }}
-                style={props.style}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-      <Toaster />
-    </GestureHandlerRootView>
+          {/* Profile */}
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: "Profile",
+              headerRight: () => <SettingsButton isDarkTheme={isDarkTheme} />,
+              tabBarIcon: ({ focused, color }) => (
+                <Icon
+                  name="profile"
+                  color={color}
+                  strokeWidth={focused ? 0.5 : 2.5}
+                  fill={focused ? color : "none"}
+                  height={26}
+                  width={26}
+                />
+              ),
+              tabBarButton: (props) => (
+                <Pressable
+                  {...props}
+                  android_ripple={{ color: "transparent" }}
+                  style={props.style}
+                />
+              ),
+            }}
+          />
+        </Tabs>
   );
 };
 

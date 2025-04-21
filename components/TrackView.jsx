@@ -11,6 +11,7 @@ import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import InfoBox from "../components/InfoBox";
 import { NativeModules } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 const { LiveActivityManager } = NativeModules;
 
 export const startLiveActivity = (distance, time) => {
@@ -48,11 +49,13 @@ const styles = StyleSheet.create({
 });
 
 const TrackView = ({ pacer = null, autoStart = false }) => {
+  const { challengeTitle, levelIndex } = useLocalSearchParams();
+
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const iconColor = isDarkTheme
-    ? theme.darkColors.track
-    : theme.lightColors.track;
+    ? theme.darkColors.trackOverlay
+    : theme.lightColors.trackOverlay;
   const { animationColor, animationProgress, resetAnimation } =
     useAnimationContext();
   const [connectionStatus, setConnectionStatus] = useState(false);
@@ -66,6 +69,7 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
   const [totalReps, setTotalReps] = useState(pacer?.repetitions || 0);
   const [isResting, setIsResting] = useState(false);
   const [restCountdown, setRestCountdown] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     if (autoStart && pacer) {
@@ -80,22 +84,61 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     }
   }, [autoStart, pacer]);
 
-    const completeChallenge = async (pacer) => {
-      try {
-        const stored = await AsyncStorage.getItem("completedBadges");
-        const completed = stored ? JSON.parse(stored) : [];
-  
-        if (!completed.includes(pacer.id)) {
-          completed.push(pacer.id);
-          await AsyncStorage.setItem(
-            "completedBadges",
-            JSON.stringify(completed)
-          );
-        }
-      } catch (err) {
-        console.error("Error saving completed badge:", err);
+  const completeChallenge = async (pacer) => {
+    try {
+      const stored = await AsyncStorage.getItem("completedBadges");
+      const completed = stored ? JSON.parse(stored) : [];
+
+      // Try to find the challenge in challengeData using title
+      let badgeKey = pacer.badge || pacer.id || pacer.challengeTitle;
+
+      if (!badgeKey && pacer.title) {
+        const match = challengeData.find((c) => c.title === pacer.title);
+        if (match) badgeKey = match.badge;
       }
-    };
+
+      if (!badgeKey) {
+        console.warn("🚫 No badge key found in pacer:", pacer);
+        return;
+      }
+
+      if (!completed.includes(badgeKey)) {
+        completed.push(badgeKey);
+        await AsyncStorage.setItem(
+          "completedBadges",
+          JSON.stringify(completed)
+        );
+        console.log("✅ Badge saved:", badgeKey);
+      }
+    } catch (err) {
+      console.error("Error saving completed badge:", err);
+    }
+  };
+
+  const markLevelComplete = async (title, levelIdx) => {
+    const storedChallenge = await AsyncStorage.getItem(title);
+    if (!storedChallenge) return;
+
+    const updated = JSON.parse(storedChallenge);
+    updated.levels[levelIdx].isCompleted = true;
+
+    // Unlock next level if there is one
+    if (updated.levels[levelIdx + 1]) {
+      updated.levels[levelIdx + 1].isLocked = false;
+    }
+
+    // Check if all levels are complete
+    const allDone = updated.levels.every((lvl) => lvl.isCompleted);
+    console.log("All levels done?", allDone);
+
+    if (allDone) {
+      console.log("🏅 Awarding badge from:", updated);
+      console.log("🏷️ Badge key:", updated.badge);
+      completeChallenge(updated);
+    }
+
+    await AsyncStorage.setItem(updated.title, JSON.stringify(updated));
+  };
 
   const startWorkout = (distance, time, reps = 0, delay = 0) => {
     if (timerInterval.current) clearInterval(timerInterval.current);
@@ -155,6 +198,7 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
           } else {
             stopWorkout();
             completeChallenge(pacer);
+            markLevelComplete(challengeTitle, parseInt(levelIndex, 10));
           }
         }
       }, 1000);
@@ -230,10 +274,23 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     }
   };
 
+  const handleDisconnect = async () => {
+    console.log("🔌 Disconnecting...");
+    try {
+      await bleHelper.disconnect(); // <- make sure disconnect is a Promise
+      console.log("📡 Disconnected successfully");
+      setIsConnected(false);
+      setConnectionStatus(false);
+    } catch (error) {
+      console.log("❌ Disconnect failed:", error);
+    }
+  };
+
   const connectHelper = async () => {
     try {
       await connectBluetooth();
       setConnectionStatus(true);
+      setIsConnected(true);
       Toast.show({
         type: "messageToast",
         position: "top",
@@ -358,12 +415,14 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         formatTime={formatTime}
         onConnectPress={connectHelper}
         onStopPress={stopWorkout}
+        onDisconnectPress={handleDisconnect}
+        isConnected={isConnected}
       />
       {!connectionStatus && (
         <View style={styles.connectionStatusContainer}>
           <Icon name="bluetooth" size={36} color={iconColor} />
           <Text style={[styles.connectionText, { color: iconColor }]}>
-            Not Connected
+            Not Connect
           </Text>
         </View>
       )}

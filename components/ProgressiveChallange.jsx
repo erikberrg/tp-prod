@@ -59,7 +59,7 @@ export default function ProgressiveChallenge({ challenge, onStart }) {
       <Pressable
         onPress={() => {
           router.push({
-            pathname: "/challangeScreen",
+            pathname: "/(modal)/challengeModal",
             params: { challenge: JSON.stringify(challenge) },
           });
         }}

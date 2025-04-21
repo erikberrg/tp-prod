@@ -10,8 +10,6 @@ TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
   }
   if (data) {
     const { locations } = data;
-    console.log('📍 Background location update:', locations);
-    // You can store to AsyncStorage or send to server here
   }
 });
 

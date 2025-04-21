@@ -1,27 +1,17 @@
 [
     {
-      "week": "2025-04-21",
-      "id": "weekly-03",
-      "name": "Stevie's Sprints",
-      "icon": "weekOne",
-      "color": "#512698",
-      "distance": 200,
-      "minutes": 0,
-      "seconds": 40,
-      "repetitions": 3,
-      "delay": 10
-    },
-    {
       "week": "2025-04-28",
       "id": "weekly-04",
-      "name": "Flash Burst",
+      "name": "Stevie's Workout",
       "icon": "trophy",
-      "color": "#2980B9",
-      "distance": 100,
+      "color": "#512698",
+      "badge": "weekOne",
+      "badgeText": "APR 21",
+      "distance": 200,
       "minutes": 0,
       "seconds": 12,
-      "repetitions": 5,
-      "delay": 15
+      "repetitions": 1,
+      "delay": 0
     },
     {
       "week": "2025-05-05",

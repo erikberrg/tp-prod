@@ -6,87 +6,80 @@ import {
   useColorScheme,
   Image,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import LinearGradient from "react-native-linear-gradient";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import Icon from "../assets/icons";
-import { theme } from "../constants/theme";
+import Icon from "../../assets/icons";
+import { theme } from "../../constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { handleStart, startPacerAnimation } from "../../helpers/handleStart";
+import { MODES } from "../../constants/modes";
+import { useFocusEffect } from "@react-navigation/native";
 
-const challangeScreen = () => {
+const ChallengeModal = () => {
   const { challenge } = useLocalSearchParams();
   const parsedChallenge = JSON.parse(challenge);
   const router = useRouter();
   const [currentChallenge, setCurrentChallenge] = useState(parsedChallenge);
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
+  const [mode, setMode] = useState(MODES.BLUETOOTH);
 
   useEffect(() => {
-    const loadProgress = async () => {
-      const saved = await AsyncStorage.getItem(parsedChallenge.title);
-      if (saved) {
-        setCurrentChallenge(JSON.parse(saved));
-      }
-    };
-    loadProgress();
+    AsyncStorage.getItem("runMode").then((saved) => {
+      if (saved) setMode(saved);
+    });
   }, []);
 
-  const awardBadge = async (badgeKey) => {
-    const earned = await AsyncStorage.getItem("earnedBadges");
-    let badges = earned ? JSON.parse(earned) : [];
-  
-    if (!badges.includes(badgeKey)) {
-      badges.push(badgeKey);
-      await AsyncStorage.setItem("earnedBadges", JSON.stringify(badges));
-      Toast.show({
-        type: "success",
-        text1: "Badge Unlocked!",
-        text2: `You earned the ${badgeKey} badge 🎉`,
-      });
+  const loadProgress = async () => {
+    const saved = await AsyncStorage.getItem(parsedChallenge.title);
+    if (saved) {
+      const updated = JSON.parse(saved);
+      console.log("Loaded progress:", updated.levels); // helpful debug
+      setCurrentChallenge((prev) => ({
+        ...prev,
+        levels: updated.levels,
+      }));
     }
   };
 
-  const handleStart = () => {
-    setLoading(true);
-    buttonWidth.value = 35;
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress();
+    }, [])
+  );
 
-    onStart(pacer); // Pass challenge pacer data
+  const handleStartPress = async (level) => {
+    const pacer = {
+      ...level,
+      color: currentChallenge.color || "red",
+      minutes: currentChallenge.minutes || 0,
+      seconds: currentChallenge.seconds || 10,
+      challengeTitle: currentChallenge.title,
+      levelIndex: level.level - 1,
+      badge: currentChallenge.badge, // ✅ Add this!
+    };
 
-    setTimeout(() => {
-      setLoading(false);
-      buttonWidth.value = 70;
-    }, 4000);
-  };
+    console.log("🔍 Parsed Challenge:", parsedChallenge);
 
-  const markLevelComplete = async (levelIndex) => {
-    const updated = { ...parsedChallenge };
-    updated.levels[levelIndex].isCompleted = true;
-  
-    // Unlock next level
-    if (updated.levels[levelIndex + 1]) {
-      updated.levels[levelIndex + 1].isLocked = false;
-    }
-  
-    // If all levels complete, mark badge earned
-    const allDone = updated.levels.every((lvl) => lvl.isCompleted);
-    if (allDone) {
-      awardBadge(updated.badge); // Your badge key
-    }
-  
-    // Save updated progress
-    await AsyncStorage.setItem(updated.title, JSON.stringify(updated));
-    router.replace({
-      pathname: "/challengeScreen",
-      params: { challenge: JSON.stringify(updated) }
+    // Save progress to AsyncStorage before starting
+    await AsyncStorage.setItem(
+      currentChallenge.title,
+      JSON.stringify(currentChallenge)
+    );
+
+    handleStart({
+      pacer,
+      mode,
+      updatePacerStats: null,
+      router,
     });
+    await startPacerAnimation(pacer);
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={() => {
-          router.back();
-        }}
+        onPress={() => router.back()}
         style={{
           position: "absolute",
           width: 50,
@@ -94,12 +87,9 @@ const challangeScreen = () => {
           zIndex: 1000,
           top: 20,
           left: 20,
-          right: 0,
-          bottom: 0,
           backgroundColor: "white",
           borderRadius: 16,
           borderCurve: "continuous",
-          display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -112,18 +102,17 @@ const challangeScreen = () => {
           fill={"transparent"}
         />
       </TouchableOpacity>
+
       <View style={styles.gradientContainer}>
-        <Text style={styles.gtitle}>{parsedChallenge.title}</Text>
+        <Text style={styles.gtitle}>{currentChallenge.title}</Text>
         <View style={styles.icon}>
           <Image
-            source={parsedChallenge.image}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
+            source={currentChallenge.image}
+            style={{ width: "100%", height: "100%" }}
           />
         </View>
       </View>
+
       <View style={styles.textContainer}>
         <Text
           style={[
@@ -135,10 +124,11 @@ const challangeScreen = () => {
             },
           ]}
         >
-          {parsedChallenge.title}
+          {currentChallenge.title}
         </Text>
+
         <View style={styles.actionGroup}>
-          {parsedChallenge.levels?.map((level) => (
+          {currentChallenge.levels?.map((level) => (
             <View
               key={level.level}
               style={[
@@ -150,9 +140,7 @@ const challangeScreen = () => {
                 },
               ]}
             >
-              <View
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
+              <View style={{ flexDirection: "column", gap: 10 }}>
                 <Text style={{ fontSize: 16, fontWeight: "bold" }}>
                   Level {level.level} {level.label}
                 </Text>
@@ -160,11 +148,10 @@ const challangeScreen = () => {
                   {level.distance / 1000} km
                 </Text>
               </View>
+
               <TouchableOpacity
                 disabled={level.isLocked}
-                onPress={() => {
-                  handleStart(level);
-                }}
+                onPress={() => handleStartPress(level)}
                 style={[
                   level.isLocked && { opacity: 0.5 },
                   {
@@ -191,6 +178,7 @@ const challangeScreen = () => {
               </TouchableOpacity>
             </View>
           ))}
+
           <View
             style={{
               marginTop: 5,
@@ -200,14 +188,11 @@ const challangeScreen = () => {
                 : theme.lightColors.border,
               padding: 10,
               borderRadius: 20,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
               alignItems: "center",
               gap: 8,
             }}
           >
-            <Icon name={parsedChallenge.badge} />
+            <Icon name={currentChallenge.badge} />
             <Text
               style={{
                 fontSize: 8,
@@ -218,7 +203,7 @@ const challangeScreen = () => {
                   : theme.lightColors.subtext,
               }}
             >
-              {parsedChallenge.badgeText}
+              {currentChallenge.badgeText}
             </Text>
           </View>
         </View>
@@ -230,16 +215,11 @@ const challangeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
   },
   actionGroup: {
     flex: 1,
-    display: "flex",
     flexDirection: "column",
     gap: 12,
-    justifyContent: "flex-start",
     alignItems: "center",
   },
   title: {
@@ -254,15 +234,9 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 300,
     overflow: "hidden",
-    display: "flex",
     flexDirection: "column",
     justifyContent: "flex-end",
     alignItems: "flex-start",
-  },
-  gradient: {
-    position: "absolute",
-    height: 300,
-    width: "100%",
   },
   gtitle: {
     color: "white",
@@ -275,7 +249,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
@@ -284,12 +257,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
     gap: 20,
-    display: "flex",
     flexDirection: "column",
     flex: 1,
   },
   level: {
-    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -301,4 +272,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default challangeScreen;
+export default ChallengeModal;

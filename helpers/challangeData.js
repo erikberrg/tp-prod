@@ -7,9 +7,9 @@ const challenges = [
     badge: 'fiveK',
     badgeText: '5K BADGE',
     levels: [
-      { level: 1, distance: 1600, isCompleted: false, isLocked: false },
-      { level: 2, distance: 3200, isCompleted: false, isLocked: true },
-      { level: 3, distance: 5000, isCompleted: false, isLocked: true }
+      { level: 1, distance: 200, isCompleted: false, isLocked: false },
+      { level: 2, distance: 10, isCompleted: false, isLocked: true },
+      { level: 3, distance: 10, isCompleted: false, isLocked: true }
     ]
   },
   {

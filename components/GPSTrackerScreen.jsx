@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   useColorScheme,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import MapView, { Polyline } from "react-native-maps";
+import MapView, { Animated, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import { getDistance } from "geolib";
 import { theme } from "../constants/theme";
@@ -15,9 +15,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
 import LinearGradient from "react-native-linear-gradient";
-import * as Haptics from 'expo-haptics';
-import { startBackgroundLocation, stopBackgroundLocation } from "../helpers/locationTasks";
+import * as Haptics from "expo-haptics";
+import {
+  startBackgroundLocation,
+  stopBackgroundLocation,
+} from "../helpers/locationTasks";
 import { NativeModules } from "react-native";
+import AnimatedPressable from "../components/ui/AnimatedPressable";
+import { useLocalSearchParams } from "expo-router";
+
 const { LiveActivityManager } = NativeModules;
 
 export const startLiveActivity = (distance, time) => {
@@ -33,6 +39,7 @@ export const endLiveActivity = () => {
 };
 
 export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
+  const { challengeTitle, levelIndex } = useLocalSearchParams();
   const [targetDistance, setTargetDistance] = useState(
     Number(pacer?.distance ?? 0)
   );
@@ -68,6 +75,7 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
       setShouldStop(false); // reset flag
       stopWorkout();
       completeChallenge(pacer);
+      markLevelComplete(challengeTitle, parseInt(levelIndex, 10));
     }
   }, [shouldStop]);
 
@@ -165,17 +173,54 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
     try {
       const stored = await AsyncStorage.getItem("completedBadges");
       const completed = stored ? JSON.parse(stored) : [];
-
-      if (!completed.includes(pacer.id)) {
-        completed.push(pacer.id);
-        await AsyncStorage.setItem(
-          "completedBadges",
-          JSON.stringify(completed)
-        );
+  
+      // Try to find the challenge in challengeData using title
+      let badgeKey = pacer.badge || pacer.id || pacer.challengeTitle;
+      
+      if (!badgeKey && pacer.title) {
+        const match = challengeData.find(c => c.title === pacer.title);
+        if (match) badgeKey = match.badge;
+      }
+  
+      if (!badgeKey) {
+        console.warn("🚫 No badge key found in pacer:", pacer);
+        return;
+      }
+  
+      if (!completed.includes(badgeKey)) {
+        completed.push(badgeKey);
+        await AsyncStorage.setItem("completedBadges", JSON.stringify(completed));
+        console.log("✅ Badge saved:", badgeKey);
       }
     } catch (err) {
       console.error("Error saving completed badge:", err);
     }
+  };
+  
+
+  const markLevelComplete = async (title, levelIdx) => {
+    const storedChallenge = await AsyncStorage.getItem(title);
+    if (!storedChallenge) return;
+
+    const updated = JSON.parse(storedChallenge);
+    updated.levels[levelIdx].isCompleted = true;
+
+    // Unlock next level if there is one
+    if (updated.levels[levelIdx + 1]) {
+      updated.levels[levelIdx + 1].isLocked = false;
+    }
+
+    // Check if all levels are complete
+    const allDone = updated.levels.every((lvl) => lvl.isCompleted);
+    console.log("All levels done?", allDone);
+
+    if (allDone) {
+      console.log("🏅 Awarding badge from:", updated);
+      console.log("🏷️ Badge key:", updated.badge);
+      completeChallenge(updated);
+    }
+
+    await AsyncStorage.setItem(updated.title, JSON.stringify(updated));
   };
 
   const startWorkout = (distance = 0, time = 0) => {
@@ -223,12 +268,12 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
       Toast.show({
         type: "messageToast",
         position: "top",
-        topOffset: 120,
+        topOffset: 60,
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
         text1: "Activity Saved",
-        text2: 'runner',
+        text2: "runner",
       });
 
       const storedRuns = await AsyncStorage.getItem("totalRuns");
@@ -379,7 +424,7 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
 
           {!isRunning && (
             <View>
-              <TouchableOpacity
+              <AnimatedPressable
                 style={{
                   width: 100,
                   height: 40,
@@ -406,14 +451,14 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                 >
                   Quick Start
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             </View>
           )}
 
           {isRunning && (
-            <TouchableOpacity
+            <AnimatedPressable
               style={{
-                width: 40,
+                width: 100,
                 height: 40,
                 backgroundColor: theme.colors.stop,
                 borderRadius: 25,
@@ -425,7 +470,7 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                 Toast.show({
                   type: "messageToast",
                   position: "top",
-                  topOffset: 110,
+                  topOffset: 60,
                   visibilityTime: 5000,
                   autoHide: true,
                   swipeable: true,
@@ -441,8 +486,16 @@ export default function GPSTrackerScreen({ pacer = null, autoStart = false }) {
                 stopWorkout();
               }}
             >
-              <Icon name="stop" color="white" strokeWidth={3} height={20} />
-            </TouchableOpacity>
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  fontSize: 12,
+                  color: theme.darkColors.text,
+                }}
+              >
+                Stop
+              </Text>
+            </AnimatedPressable>
           )}
         </View>
       </View>

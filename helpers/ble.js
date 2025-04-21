@@ -70,28 +70,10 @@ class BLEHelper {
       }, 4000);
     });
   }
-  
-  async sendTest(color, duration, distance, repetitions, delay) {
-    const test = `${color} ${duration} ${distance} ${repetitions} ${delay}`;
-    if (!this.device) {
-      console.error("No device connected.");
-      return;
-    }
-    try {
-      const base64Message = Buffer.from(test, "utf-8").toString("base64");
-      await this.device.writeCharacteristicWithResponseForService(
-        UART_SERVICE_UUID,
-        TX_CHARACTERISTIC_UUID,
-        base64Message
-      );
-      console.log(`Sent test command: ${test}`);
-    } catch {
-      console.error("Error sending test command:", error);
-    }
-  }
 
-  async sendPacer(color, duration) {
-    const pacer = `start ${color} ${duration}`;
+  async sendPacer(color, duration, distance) {
+    const pacer = `start ${color} ${(duration / distance)} ${distance}`;
+    console.log(`Sending pacer command: ${pacer}`);
     if (!this.device) {
       console.error("No device connected.");
       return;
@@ -104,8 +86,6 @@ class BLEHelper {
         TX_CHARACTERISTIC_UUID,
         base64Message
       );
-      console.log(`${color}, ${duration}, ${distance}, ${repetitions}, ${delay}`);
-      console.log(`Sent pacer command: ${pacer}`);
     } catch (error) {
       console.error("Error sending color command:", error);
     }
@@ -130,13 +110,21 @@ class BLEHelper {
     }
   }
 
-  disconnect() {
+  async disconnect() {
     if (this.device) {
-      this.device.disconnect();
-      this.device = null;
-      console.log("Disconnected from ESP32.");
+      try {
+        await this.device.cancelConnection(); // correct BLE-Plx way
+        console.log("✅ Disconnected from ESP32.");
+        this.device = null;
+      } catch (error) {
+        console.error("❌ Error disconnecting from ESP32:", error);
+        throw error;
+      }
+    } else {
+      console.log("ℹ️ No device to disconnect.");
     }
   }
+  
   
   getConnectionStatus() {
     return this.connectionStatus;

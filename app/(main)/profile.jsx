@@ -12,7 +12,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { theme } from "../../constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Badge from "../../components/Badge";
-import challengeData from "../../helpers/weeklyPacer.json";
+import levelChallenges from "../../helpers/challangeData";
+import weeklyChallenges from "../../helpers/weeklyPacer.json";
 import Icon from "../../assets/icons";
 import { useRouter } from "expo-router";
 
@@ -22,6 +23,7 @@ export default function profile() {
   const [totalDistance, setTotalDistance] = useState(0);
   const [completedBadges, setCompletedBadges] = useState([]);
   const [workoutHistory, setWorkoutHistory] = useState([]);
+  const allChallenges = [...levelChallenges, ...weeklyChallenges];
   const router = useRouter();
 
   const colorScheme = useColorScheme();
@@ -39,10 +41,13 @@ export default function profile() {
         const storedBadges = await AsyncStorage.getItem("completedBadges");
         const completedIds = storedBadges ? JSON.parse(storedBadges) : [];
 
-        const filteredBadges = challengeData.filter((c) =>
-          completedIds.includes(c.id)
+        const filteredBadges = allChallenges.filter(
+          (c) => c.badge && completedIds.includes(c.badge)
         );
         setCompletedBadges(filteredBadges);
+        console.log("Completed IDs:", completedIds);
+        console.log("ChallengeData badges:", allChallenges.map(c => c.badge));
+        console.log("Filtered Badges:", filteredBadges);
       };
 
       loadProfile();

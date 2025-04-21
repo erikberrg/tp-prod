@@ -10,6 +10,8 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toaster from "../components/Toaster";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -40,105 +42,116 @@ const _layout = () => {
   const isDarkTheme = colorScheme === "dark";
 
   return (
-    <AnimationProvider>
-      <Stack
-        screenOptions={{
-          contentStyle: {
-            backgroundColor: isDarkTheme
-              ? theme.darkColors.bg
-              : theme.lightColors.bg,
-          },
-        }}
-      >
-        {/* Main App */}
-        <Stack.Screen
-          name="(main)"
-          options={{
-            headerShown: false,
-          }}
-        />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+        <AnimationProvider>
+          <Stack
+            screenOptions={{
+              contentStyle: {
+                backgroundColor: isDarkTheme
+                  ? theme.darkColors.bg
+                  : theme.lightColors.bg,
+              },
+            }}
+          >
+            {/* Main App */}
+            <Stack.Screen
+              name="(main)"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-        {/* Modal Screen */}
-        <Stack.Screen
-          name="Modal"
-          options={({ route }) => ({
-            presentation: "modal",
-            title: "New Workout",
-            headerShadowVisible: false,
-            headerTintColor: isDarkTheme
-              ? theme.darkColors.text
-              : theme.lightColors.text,
-            headerStyle: {
-              backgroundColor: isDarkTheme
-                ? theme.darkColors.modalBg
-                : theme.lightColors.modalBg,
-            },
-            headerTitleAlign: "center",
-            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
-          })}
-        />
-        {/* Settings Screen */}
-        <Stack.Screen
-          name="settings"
-          options={({ route }) => ({
-            presentation: "modal",
-            title: "Settings",
-            headerShadowVisible: false,
-            headerTintColor: isDarkTheme
-              ? theme.darkColors.text
-              : theme.lightColors.text,
-            headerStyle: {
-              backgroundColor: isDarkTheme
-                ? theme.darkColors.modalBg
-                : theme.lightColors.modalBg,
-            },
-            headerTitleAlign: "center",
-            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
-          })}
-        />
+            {/* Modal Screen */}
+            <Stack.Screen
+              name="Modal"
+              options={({ route }) => ({
+                presentation: "modal",
+                title: "New Workout",
+                headerShadowVisible: false,
+                headerTintColor: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+                headerStyle: {
+                  backgroundColor: isDarkTheme
+                    ? theme.darkColors.modalBg
+                    : theme.lightColors.modalBg,
+                },
+                headerTitleAlign: "center",
+                headerLeft: () => (
+                  <HeaderLeftButton isDarkTheme={isDarkTheme} />
+                ),
+              })}
+            />
+            {/* Settings Screen */}
+            <Stack.Screen
+              name="settings"
+              options={({ route }) => ({
+                presentation: "modal",
+                title: "Settings",
+                headerShadowVisible: false,
+                headerTintColor: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+                headerStyle: {
+                  backgroundColor: isDarkTheme
+                    ? theme.darkColors.modalBg
+                    : theme.lightColors.modalBg,
+                },
+                headerTitleAlign: "center",
+                headerLeft: () => (
+                  <HeaderLeftButton isDarkTheme={isDarkTheme} />
+                ),
+              })}
+            />
 
-        {/* Workout Screen */}
-        <Stack.Screen
-          name="workout"
-          options={({ route }) => ({
-            title: "Workout",
-            headerShown: false,
-            headerShadowVisible: false,
-            headerTintColor: isDarkTheme
-              ? theme.darkColors.text
-              : theme.lightColors.text,
-            headerStyle: {
-              backgroundColor: isDarkTheme
-                ? theme.darkColors.bg
-                : theme.lightColors.bg,
-            },
-            headerTitleAlign: "center",
-            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
-          })}
-        />
+            {/* Workout Screen */}
+            <Stack.Screen
+              name="workout"
+              options={({ route }) => ({
+                title: "Workout",
+                headerShown: false,
+                headerShadowVisible: false,
+                headerTintColor: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+                headerStyle: {
+                  backgroundColor: isDarkTheme
+                    ? theme.darkColors.bg
+                    : theme.lightColors.bg,
+                },
+                headerTitleAlign: "center",
+                headerLeft: () => (
+                  <HeaderLeftButton isDarkTheme={isDarkTheme} />
+                ),
+              })}
+            />
 
-        {/* Challenge */}
-        <Stack.Screen
-          name="challangeScreen"
-          options={({ route }) => ({
-            presentation: "modal",
-            title: "Challange",
-            headerShown: false,
-            headerShadowVisible: false,
-            headerTintColor: isDarkTheme
-              ? theme.darkColors.text
-              : theme.lightColors.text,
-            headerStyle: {
-              backgroundColor: isDarkTheme
-                ? theme.darkColors.bg
-                : theme.lightColors.bg,
-            },
-            headerTitleAlign: "center",
-            headerLeft: () => <HeaderLeftButton isDarkTheme={isDarkTheme} />,
-          })}
-        />
-      </Stack>
-    </AnimationProvider>
+            {/* Challenge */}
+            <Stack.Screen
+              name="(modal)/challengeModal"
+              options={({ route }) => ({
+                presentation: "modal",
+                title: "Challenge",
+                headerShown: false,
+                headerShadowVisible: false,
+                headerTintColor: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+                headerStyle: {
+                  backgroundColor: isDarkTheme
+                    ? theme.darkColors.bg
+                    : theme.lightColors.bg,
+                },
+                headerTitleAlign: "center",
+                headerLeft: () => (
+                  <HeaderLeftButton isDarkTheme={isDarkTheme} />
+                ),
+              })}
+            />
+          </Stack>
+          <Toaster />
+        </AnimationProvider>
+    </GestureHandlerRootView>
   );
 };
 
