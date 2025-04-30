@@ -3,7 +3,6 @@
 # native folders
 ios/
 android/
-dist/
 
 # dependencies
 node_modules/
