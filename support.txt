@@ -10,8 +10,8 @@ Welcome to the Track Pacer support page. Here, you will find instructions on how
 To begin using the Track Pacer application, follow these steps:
 
 1. Download and install the Track Pacer app.
-3. Enable Bluetooth on your device to connect with the light system.
-4. Follow the instructions to set up your pacing preferences.
+2. Enable Bluetooth on your device to connect with the light system.
+3. Follow the instructions to set up your pacing preferences.
 
 ---
 
@@ -19,8 +19,8 @@ To begin using the Track Pacer application, follow these steps:
 For proper functionality, the app needs to communicate with the Light System device via Bluetooth.
 
 1. Ensure your Light System is plugged in.
-2. Navigate to the "Device Settings" in the app.
-3. Tap "Scan for Devices" and select your ESP32 from the list.
+2. Navigate to the home page.
+3. Tap "Connect" and the Track Pacer System will automatically connect if the system is plugged in and ready for pairing.
 4. Once connected, you will see a confirmation message.
 
 If you experience connection issues, ensure Bluetooth is enabled and try restarting both the Light System and your mobile device.
@@ -62,7 +62,7 @@ If you encounter issues while using the app, try the following solutions:
 A: No, the Track Pacer app works offline, but an internet connection may be required for updates.
 
 **Q: How do I delete my pacer preset?**  
-A: Swipe on the preset to the left and a delete button will appear.
+A: Click edit and the trash button.
 
 ---
 

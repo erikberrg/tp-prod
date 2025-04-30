@@ -1,26 +1,23 @@
 // Screen that contains a list of user presets
-
 import uuid from "react-native-uuid";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PacerList from "../../components/PacerList";
 import bleHelper from "../../helpers/ble";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, useColorScheme } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useAnimationContext } from "../../components/AnimationContext";
 import { theme } from "../../constants/theme";
-import { MODES } from "../../constants/modes";
 import { handleStart, startPacerAnimation } from "../../helpers/handleStart";
+import Toast from "react-native-toast-message";
+import { calculateDuration } from "../../helpers/calculations";
 
 export default function ViewPresets() {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const router = useRouter();
-  const { setAnimationColor, startAnimation } = useAnimationContext();
   const [pacers, setPacers] = useState([]);
-  const [mode, setMode] = useState(MODES.BLUETOOTH);
 
   // Styles
   const styles = StyleSheet.create({
@@ -75,36 +72,10 @@ export default function ViewPresets() {
     }
   };
 
-  useEffect(() => {
-    AsyncStorage.getItem("runMode").then((saved) => {
-      if (saved) setMode(saved);
-    });
-  }, []);
-
   // Bluetooth connection helper
   const connectBluetooth = async () => {
     if (!bleHelper.device) {
       await bleHelper.scanAndConnect();
-    }
-  };
-
-  const updatePacerStats = async (pacer) => {
-    try {
-      const totalRuns = await AsyncStorage.getItem("totalRuns");
-      const totalDistance = await AsyncStorage.getItem("totalDistance");
-
-      const runs = parseInt(totalRuns) || 0;
-      const distance = parseInt(totalDistance) || 0;
-
-      const runDistance = pacer.distance * (pacer.repetitions || 1); // default to 1 rep
-
-      await AsyncStorage.setItem("totalRuns", (runs + 1).toString());
-      await AsyncStorage.setItem(
-        "totalDistance",
-        (distance + runDistance).toString()
-      );
-    } catch (err) {
-      console.error("Failed to update stats", err);
     }
   };
 
@@ -123,14 +94,43 @@ export default function ViewPresets() {
       <PacerList
         pacers={pacers}
         onStart={async (pacer) => {
-          await handleStart({
-            pacer,
-            mode,
-            connectBluetooth,
-            updatePacerStats,
-            router,
-          });
-          await startPacerAnimation(pacer);
+          try {
+            if (!bleHelper.getConnectionStatus()) {
+              try {
+                await bleHelper.scanAndConnect();
+              } catch (scanError) {
+                console.log("Color: " + pacer.color)
+                console.log("Lap Time: " + calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths) / (pacer.distance / 200));
+                console.log("Segment Delay: " + (calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths) / (pacer.distance / 200)) / 5);
+                console.log("Total Time: " + calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths))
+                console.warn("Scan failed or timed out");
+              }
+            }
+
+            // If still not connected, show toast
+            if (!bleHelper.getConnectionStatus()) {
+              Toast.show({
+                type: "messageToast",
+                text1: "Not Connected",
+                text2: "bluetooth",
+                position: "bottom",
+                bottomOffset: 90,
+                visibilityTime: 4000,
+                autoHide: true,
+              });
+              return;
+            }
+
+            await startPacerAnimation(pacer);
+            // If connected, continue with the normal flow
+            await handleStart({
+              pacer,
+              connectBluetooth,
+              router,
+            });
+          } catch (err) {
+            console.error("Error during start:", err);
+          }
         }}
         onDelete={handleDeletePacer}
       />

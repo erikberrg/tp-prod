@@ -16,8 +16,6 @@ import { NameInput } from "../components/form/NameInput";
 import { ColorSelector } from "../components/form/ColorSelector";
 import { DistancePicker } from "../components/form/DistancePicker";
 import { TimePicker } from "../components/form/TimePicker";
-import { RepetitionsInput } from "../components/form/RepetitionsInput";
-import { IntervalDelayPicker } from "../components/form/IntervalDelayPicker";
 
 export default function ModalScreen() {
   const navigation = useNavigation();
@@ -55,8 +53,7 @@ export default function ModalScreen() {
     distance: 200,
     minutes: 0,
     seconds: 30,
-    repetitions: 1,
-    delay: 0,
+    hundredths: 0,
   });
 
   // Handle form validation
@@ -97,9 +94,9 @@ export default function ModalScreen() {
     navigation.setOptions({
       headerRight: () => (
       <TouchableOpacity
-        onPressOut={handleExportData}
+        onPressIn={handleExportData}
         disabled={!isFormValid}
-        style={{ marginRight: 6 }}
+        style={{ marginRight: 6, padding: 10, }}
       >
         <Text
         style={{
@@ -217,55 +214,9 @@ export default function ModalScreen() {
         <TimePicker
           minutes={pacerData.minutes}
           seconds={pacerData.seconds}
-          onChangeTime={(minutes, seconds) =>
-            setPacerData((prev) => ({ ...prev, minutes, seconds }))
-          }
-        />
-      </Animated.View>
-
-      <Animated.View
-        layout={LinearTransition}
-        style={[
-          styles.section,
-          {
-            backgroundColor: isDarkTheme
-              ? theme.darkColors.section
-              : theme.lightColors.bg,
-          },
-        ]}
-      >
-        {/* Repetitions */}
-        <RepetitionsInput
-          repetitions={pacerData.repetitions}
-          onChangeRepetitions={(repetitions) =>
-            setPacerData((prev) => ({ ...prev, repetitions }))
-          }
-        />
-
-        <Animated.View
-          layout={LinearTransition}
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View
-            style={{
-              width: "90%",
-              borderBottomColor: dividerColor,
-              borderBottomWidth: 0.3,
-            }}
-          />
-        </Animated.View>
-
-        {/* Interval Picker */}
-        <IntervalDelayPicker
-          delay={pacerData.delay}
-          onChangeDelay={(delay) =>
-            setPacerData((prev) => ({ ...prev, delay }))
+          hundredths={pacerData.hundredths}
+          onChangeTime={(minutes, seconds, hundredths) =>
+            setPacerData((prev) => ({ ...prev, minutes, seconds, hundredths }))
           }
         />
       </Animated.View>

@@ -72,25 +72,85 @@ class BLEHelper {
   }
 
   async sendPacer(color, duration, distance) {
-    const pacer = `start ${color} ${(duration / distance)} ${distance}`;
-    console.log(`Sending pacer command: ${pacer}`);
     if (!this.device) {
       console.error("No device connected.");
       return;
     }
+  
+    const lapDuration = parseFloat(duration) / parseFloat(distance);
+    const segmentDelayMs = (lapDuration * 1000) / 5;
+    const fullLapDelayMs = lapDuration * 1000;
+  
+    for (let lap = 0; lap < distance; lap++) {
+      console.log(`Starting lap ${lap + 1}/${distance}`);
+  
+      const firstPacer = `start ${color} ${lapDuration.toFixed(2)} ${distance}`;
+      console.log(`Sending pacer command: ${firstPacer}`);
+  
+      try {
+        const base64Message = Buffer.from(firstPacer, "utf-8").toString("base64");
+        await this.device.writeCharacteristicWithResponseForService(
+          UART_SERVICE_UUID,
+          TX_CHARACTERISTIC_UUID,
+          base64Message
+        );
+        console.log("Sent start command to Unit 1");
+  
+        setTimeout(async () => {
+          const twoMsg = `two`;
+          console.log(`Sending to Unit 2: ${twoMsg}`);
+          const twoBase64 = Buffer.from(twoMsg, "utf-8").toString("base64");
+          await this.device.writeCharacteristicWithResponseForService(
+            UART_SERVICE_UUID,
+            TX_CHARACTERISTIC_UUID,
+            twoBase64
+          );
+        }, segmentDelayMs);
+  
+        setTimeout(async () => {
+          const threeMsg = `three`;
+          console.log(`Sending to Unit 3: ${threeMsg}`);
+          const threeBase64 = Buffer.from(threeMsg, "utf-8").toString("base64");
+          await this.device.writeCharacteristicWithResponseForService(
+            UART_SERVICE_UUID,
+            TX_CHARACTERISTIC_UUID,
+            threeBase64
+          );
+        }, segmentDelayMs * 2);
+  
+        setTimeout(async () => {
+          const fourMsg = `four`;
+          console.log(`Sending to Unit 4: ${fourMsg}`);
+          const fourBase64 = Buffer.from(fourMsg, "utf-8").toString("base64");
+          await this.device.writeCharacteristicWithResponseForService(
+            UART_SERVICE_UUID,
+            TX_CHARACTERISTIC_UUID,
+            fourBase64
+          );
+        }, segmentDelayMs * 3);
 
-    try {
-      const base64Message = Buffer.from(pacer, "utf-8").toString("base64");
-      await this.device.writeCharacteristicWithResponseForService(
-        UART_SERVICE_UUID,
-        TX_CHARACTERISTIC_UUID,
-        base64Message
-      );
-    } catch (error) {
-      console.error("Error sending color command:", error);
+        setTimeout(async () => {
+          const fiveMsg = `five`;
+          console.log(`Sending to Unit 5: ${fiveMsg}`);
+          const fiveBase64 = Buffer.from(fiveMsg, "utf-8").toString("base64");
+          await this.device.writeCharacteristicWithResponseForService(
+            UART_SERVICE_UUID,
+            TX_CHARACTERISTIC_UUID,
+            fiveBase64
+          );
+        }, segmentDelayMs * 4);
+  
+      } catch (error) {
+        console.error("Error sending pacer sequence:", error);
+      }
+  
+      if (lap < distance - 1) {
+        console.log(`Waiting ${fullLapDelayMs}ms before next lap...`);
+        await new Promise(resolve => setTimeout(resolve, fullLapDelayMs));
+      }
     }
   }
-
+  
   async sendStop() {
     const stop = `stop`;
     if (!this.device) {
@@ -113,17 +173,19 @@ class BLEHelper {
   async disconnect() {
     if (this.device) {
       try {
-        await this.device.cancelConnection(); // correct BLE-Plx way
-        console.log("✅ Disconnected from ESP32.");
+        await this.device.cancelConnection();
+        console.log("Disconnected from ESP32.");
         this.device = null;
+        this.setConnectionStatus(false);
       } catch (error) {
-        console.error("❌ Error disconnecting from ESP32:", error);
+        console.error("Error disconnecting from ESP32:", error);
         throw error;
       }
     } else {
-      console.log("ℹ️ No device to disconnect.");
+      console.log("No device to disconnect.");
     }
   }
+  
   
   
   getConnectionStatus() {

@@ -16,22 +16,20 @@ export default {
       bundleIdentifier: "com.erikdberg.tpprod",
       infoPlist: {
         CFBundleDisplayName: "Track Pacer",
-        NSLocationWhenInUseUsageDescription: "We need your location to track your workout.",
-        NSLocationAlwaysUsageDescription: "We need your location in the background to track your run.",
-        UIBackgroundModes: ["location"]
+        NSBluetoothAlwaysUsageDescription: "We need Bluetooth access to connect to your devices.",
        }
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#000000"
       },
       package: "com.erikdberg.tpprod",
       permissions: [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "FOREGROUND_SERVICE"
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_CONNECT"
       ]
     },
     web: {
@@ -45,9 +43,9 @@ export default {
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
+          imageWidth: 400,
           resizeMode: "contain",
-          backgroundColor: "#ffffff"
+          backgroundColor: "#000000"
         }
       ]
     ],
@@ -61,7 +59,6 @@ export default {
       eas: {
         projectId: "27471cd5-5108-4959-8cfc-cf36e29d662a"
       },
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
     }
   }
 };

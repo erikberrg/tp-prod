@@ -13,61 +13,62 @@ struct TrackPacerLiveActivityAttributes: ActivityAttributes {
 
 struct TrackPacerLiveActivityLiveActivity: Widget {
   func formattedTime(_ raw: String) -> String {
-      guard let seconds = Int(raw) else { return "\(raw)s" }
+      guard let seconds = Int(raw) else { return "\(raw)" }
       let minutes = seconds / 60
       let secs = seconds % 60
-      return "\(minutes)m \(secs)s"
+      return "\(minutes):\(secs)"
   }
 
   func formattedDistance(_ raw: String) -> String {
-      guard let meters = Double(raw) else { return "\(raw)m" }
+      guard let meters = Double(raw) else { return "\(raw)" }
       if meters >= 1000 {
           let km = meters / 1000
-          return String(format: "%.2f km", km)
+          return String(format: "%.2f", km)
       } else {
-          return "\(Int(meters)) m"
+          return "\(Int(meters))"
       }
   }
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TrackPacerLiveActivityAttributes.self) { context in
-            // Lock screen/banner Live Activity UI
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Track Pacer")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-
-                  Text("Distance: \(formattedDistance(context.state.distance))")
-                      .font(.subheadline)
+          HStack {
+              // Distance VStack
+              VStack(alignment: .leading, spacing: 2) {
+                  Text(formattedDistance(context.state.distance))
+                      .font(.title)
                       .fontWeight(.bold)
-                      .italic()
+                      .monospacedDigit()
                       .foregroundStyle(.white)
 
-                  Text("Time: \(formattedTime(context.state.timeElapsed))")
-                      .font(.subheadline)
+                  Text("Distance")
+                      .font(.caption)
+                      .foregroundStyle(.white.opacity(0.8))
+              }
+
+              Spacer().frame(width: 20)
+
+              // Time VStack
+              VStack(alignment: .leading, spacing: 2) {
+                  Text(formattedTime(context.state.timeElapsed))
+                  .font(.title)
                       .fontWeight(.bold)
-                      .italic()
+                      .monospacedDigit()
                       .foregroundStyle(.white)
-                }
 
-                Spacer()
+                  Text("Time")
+                      .font(.caption)
+                      .foregroundStyle(.white.opacity(0.8))
+              }
 
-                Button(action: {
-                    // Action could be handled via deep link in full app
-                }) {
-                    Image(systemName: "stop.fill")
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .padding(16)
-                        .background(Color.red)
-                        .clipShape(Circle())
-                }
-                .foregroundColor(.white)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .activityBackgroundTint(.black)
-            .activitySystemActionForegroundColor(.white)
+              Spacer()
+
+              RoundedRectangle(cornerRadius: 20)
+                  .stroke(Color.white, lineWidth: 6)
+                  .frame(width: 22, height: 40)
+          }
+          .padding(.horizontal, 24)
+          .padding(.vertical, 12)
+          .activityBackgroundTint(.black)
+          .activitySystemActionForegroundColor(.white)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -91,7 +92,8 @@ struct TrackPacerLiveActivityLiveActivity: Widget {
                 Text(formattedDistance(context.state.distance))
                     .font(.caption2)
             } minimal: {
-                Text("🏃")
+              Text(formattedDistance(context.state.distance))
+                  .font(.caption2)
             }
             .widgetURL(URL(string: "trackpacer://open"))
             .keylineTint(.blue)

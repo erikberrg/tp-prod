@@ -17,6 +17,7 @@ import Animated, {
   interpolate,
   Easing,
 } from "react-native-reanimated";
+import { formatRaceTime } from "../helpers/calculations";
 
 export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
   const colorScheme = useColorScheme();
@@ -104,17 +105,7 @@ export default function PacerItem({ pacer, onStart, onDelete, editMode }) {
               <View style={styles.infoWrapper}>
                 <Icon name="timer" size={18} color={iconColor} />
                 <Text style={[styles.infoText, { color: subTextColor }]}>
-                  {pacer.minutes} min {pacer.seconds} sec
-                </Text>
-              </View>
-              <View style={styles.infoWrapper}>
-                <Icon name="repeat" size={18} color={iconColor} />
-                <Text style={[styles.infoText, { color: subTextColor }]}>
-                  {pacer.repetitions}
-                </Text>
-                <Icon name="pause" size={18} color={iconColor} />
-                <Text style={[styles.infoText, { color: subTextColor }]}>
-                  {pacer.delay}
+                  {formatRaceTime(pacer.minutes, pacer.seconds, pacer.hundredths)}
                 </Text>
               </View>
             </View>

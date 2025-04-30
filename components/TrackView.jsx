@@ -1,10 +1,15 @@
 // Track View
-
 import bleHelper from "../helpers/ble";
-import Icon from "../assets/icons";
 import LottieView from "lottie-react-native";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Animated, StyleSheet, View, useColorScheme, Text } from "react-native";
+import {
+  Animated,
+  StyleSheet,
+  View,
+  useColorScheme,
+  Platform,
+  Easing,
+} from "react-native";
 import { useAnimationContext } from "./AnimationContext";
 import { theme } from "../constants/theme";
 import Toast from "react-native-toast-message";
@@ -12,18 +17,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import InfoBox from "../components/InfoBox";
 import { NativeModules } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import * as Haptics from "expo-haptics";
 const { LiveActivityManager } = NativeModules;
 
 export const startLiveActivity = (distance, time) => {
-  LiveActivityManager.startActivity(distance, time);
+  if (Platform.OS === "ios" && LiveActivityManager?.startActivity) {
+    LiveActivityManager.startActivity(distance, time);
+  }
 };
 
 export const updateLiveActivity = (distance, time) => {
-  LiveActivityManager.updateActivity(distance, time);
+  if (Platform.OS === "ios" && LiveActivityManager?.updateActivity) {
+    LiveActivityManager.updateActivity(distance, time);
+  }
 };
 
 export const endLiveActivity = () => {
-  LiveActivityManager.endActivity();
+  if (Platform.OS === "ios" && LiveActivityManager?.endActivity) {
+    LiveActivityManager.endActivity();
+  }
 };
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
@@ -44,13 +56,12 @@ const styles = StyleSheet.create({
   },
   connectionText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontStyle: "italic",
   },
 });
 
 const TrackView = ({ pacer = null, autoStart = false }) => {
-  const { challengeTitle, levelIndex } = useLocalSearchParams();
-
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const iconColor = isDarkTheme
@@ -67,9 +78,9 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
   const timerInterval = useRef(null);
   const [currentRep, setCurrentRep] = useState(1);
   const [totalReps, setTotalReps] = useState(pacer?.repetitions || 0);
-  const [isResting, setIsResting] = useState(false);
-  const [restCountdown, setRestCountdown] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
+  const [pace, setPace] = useState(3);
+  const [showQuickStart, setShowQuickStart] = useState(true);
 
   useEffect(() => {
     if (autoStart && pacer) {
@@ -84,65 +95,21 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     }
   }, [autoStart, pacer]);
 
-  const completeChallenge = async (pacer) => {
-    try {
-      const stored = await AsyncStorage.getItem("completedBadges");
-      const completed = stored ? JSON.parse(stored) : [];
+  const checkConnectionStatus = useCallback(() => {
+    setConnectionStatus(bleHelper.getConnectionStatus());
+  }, []);
 
-      // Try to find the challenge in challengeData using title
-      let badgeKey = pacer.badge || pacer.id || pacer.challengeTitle;
-
-      if (!badgeKey && pacer.title) {
-        const match = challengeData.find((c) => c.title === pacer.title);
-        if (match) badgeKey = match.badge;
-      }
-
-      if (!badgeKey) {
-        console.warn("🚫 No badge key found in pacer:", pacer);
-        return;
-      }
-
-      if (!completed.includes(badgeKey)) {
-        completed.push(badgeKey);
-        await AsyncStorage.setItem(
-          "completedBadges",
-          JSON.stringify(completed)
-        );
-        console.log("✅ Badge saved:", badgeKey);
-      }
-    } catch (err) {
-      console.error("Error saving completed badge:", err);
-    }
-  };
-
-  const markLevelComplete = async (title, levelIdx) => {
-    const storedChallenge = await AsyncStorage.getItem(title);
-    if (!storedChallenge) return;
-
-    const updated = JSON.parse(storedChallenge);
-    updated.levels[levelIdx].isCompleted = true;
-
-    // Unlock next level if there is one
-    if (updated.levels[levelIdx + 1]) {
-      updated.levels[levelIdx + 1].isLocked = false;
-    }
-
-    // Check if all levels are complete
-    const allDone = updated.levels.every((lvl) => lvl.isCompleted);
-    console.log("All levels done?", allDone);
-
-    if (allDone) {
-      console.log("🏅 Awarding badge from:", updated);
-      console.log("🏷️ Badge key:", updated.badge);
-      completeChallenge(updated);
-    }
-
-    await AsyncStorage.setItem(updated.title, JSON.stringify(updated));
-  };
+  useEffect(() => {
+    checkConnectionStatus();
+    const interval = setInterval(checkConnectionStatus, 1000);
+    return () => clearInterval(interval);
+  }, [checkConnectionStatus]);
 
   const startWorkout = (distance, time, reps = 0, delay = 0) => {
     if (timerInterval.current) clearInterval(timerInterval.current);
-    startLiveActivity(`${distanceRan}`, `${timer}`);
+    if (Platform.OS === "ios") {
+      startLiveActivity(`${distanceRan}`, `${timer}`);
+    }
 
     setTotalReps(reps);
     let currentRepNum = 1;
@@ -150,12 +117,10 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     const runRep = () => {
       if (currentRepNum > reps) {
         setIsRunning(false);
-        setIsResting(false);
         return;
       }
 
       setCurrentRep(currentRepNum);
-      setIsResting(false);
       setIsRunning(true);
 
       let timeLeft = time;
@@ -169,18 +134,18 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         setRemainingTime(timeLeft);
         setRemainingDistance(distanceLeft > 0 ? distanceLeft : 0);
 
-        updateLiveActivity(
-          `${(distance - distanceLeft).toFixed(0)}`, // how much ran
-          `${Math.floor(time - timeLeft)}` // elapsed time in seconds
-        );
+        if (Platform.OS === "ios") {
+          updateLiveActivity(
+            `${(distance - distanceLeft).toFixed(0)}`,
+            `${Math.floor(time - timeLeft)}`
+          );
+        }
 
         if (timeLeft <= 0) {
           clearInterval(timerInterval.current);
 
           if (currentRepNum < reps && delay > 0) {
             let delayLeft = delay;
-            setIsResting(true);
-            setRestCountdown(delayLeft);
 
             const delayInterval = setInterval(() => {
               delayLeft -= 1;
@@ -197,8 +162,9 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
             runRep();
           } else {
             stopWorkout();
-            completeChallenge(pacer);
-            markLevelComplete(challengeTitle, parseInt(levelIndex, 10));
+            if (Platform.OS === "ios") {
+              endLiveActivity();
+            }
           }
         }
       }, 1000);
@@ -207,26 +173,17 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     runRep();
   };
 
-  const checkConnectionStatus = useCallback(() => {
-    setConnectionStatus(bleHelper.getConnectionStatus());
-  }, []);
-
-  useEffect(() => {
-    checkConnectionStatus();
-    const interval = setInterval(checkConnectionStatus, 1000);
-    return () => clearInterval(interval);
-  }, [checkConnectionStatus]);
-
   const stopWorkout = async () => {
     setIsRunning(false);
     setRemainingTime(0);
     setRemainingDistance(0);
-    setCurrentRep(1);
-    setIsResting(false);
-    setRestCountdown(0);
     setCurrentRep(0);
     setTotalReps(0);
-    endLiveActivity();
+    setShowQuickStart(false);
+    setTimeout(() => setShowQuickStart(true), 500); // wait 0.5s before showing it
+    if (Platform.OS === "ios") {
+      endLiveActivity();
+    }
 
     try {
       bleHelper.sendStop();
@@ -238,10 +195,9 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
-        text1: "Workout Ended 🎉",
+        text1: "Workout Ended",
         text2: "runner",
       });
-
       const storedRuns = await AsyncStorage.getItem("totalRuns");
       const storedDist = await AsyncStorage.getItem("totalDistance");
 
@@ -277,12 +233,12 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
   const handleDisconnect = async () => {
     console.log("🔌 Disconnecting...");
     try {
-      await bleHelper.disconnect(); // <- make sure disconnect is a Promise
-      console.log("📡 Disconnected successfully");
+      await bleHelper.disconnect();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
       setIsConnected(false);
       setConnectionStatus(false);
     } catch (error) {
-      console.log("❌ Disconnect failed:", error);
+      console.log("Disconnect failed:", error);
     }
   };
 
@@ -291,6 +247,7 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
       await connectBluetooth();
       setConnectionStatus(true);
       setIsConnected(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Success);
       Toast.show({
         type: "messageToast",
         position: "top",
@@ -298,7 +255,7 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         visibilityTime: 5000,
         autoHide: true,
         swipeable: true,
-        text1: "Bluetooth connected",
+        text1: "Device connected",
         text2: "bluetooth",
       });
     } catch (error) {
@@ -316,6 +273,68 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     }
   };
 
+  const handleQuickStart = async () => {
+    try {
+      let time = 0;
+      let distance = 0;
+
+      if (isNaN(pace) || pace <= 0) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid pace",
+          text2: "Enter meters per second (e.g., 3)",
+        });
+        return;
+      }
+
+      const lapDistance = 200; // meters
+      const lapDuration = lapDistance / pace; // seconds
+
+      // ✅ Send to ESP32
+      if (bleHelper.device) {
+        await bleHelper.sendPacer("red", lapDuration, lapDistance);
+      }
+
+      if (timerInterval.current) clearInterval(timerInterval.current);
+
+      setRemainingTime(0);
+      setRemainingDistance(0);
+      setDistanceRan(0);
+      setIsRunning(true);
+
+      if (Platform.OS === "ios") {
+        startLiveActivity("0", "0");
+      }
+
+      // ✅ Start animation synced to lap
+      animationProgress.current.setValue(0);
+      Animated.loop(
+        Animated.timing(animationProgress.current, {
+          toValue: 1,
+          duration: lapDuration * 1000, // convert seconds to ms
+          easing: Easing.linear, // ✅ makes it perfectly smooth
+          useNativeDriver: false,
+        })
+      ).start();
+
+      // ✅ Count up time and distance
+      timerInterval.current = setInterval(() => {
+        time += 1;
+        distance += pace;
+
+        setRemainingTime(time);
+        setRemainingDistance(distance);
+        setDistanceRan(distance);
+
+        if (Platform.OS === "ios") {
+          updateLiveActivity(`${Math.floor(distance)}`, `${time}`);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Quick Start error:", error);
+    }
+  };
+
   return (
     <View
       style={[
@@ -329,7 +348,7 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
     >
       <AnimatedLottieView
         style={{ width: "100%", height: "100%", marginBottom: 70 }}
-        source={require("../assets/images/track-5.json")}
+        source={require("../assets/images/track.json")}
         progress={animationProgress.current}
         colorFilters={[
           {
@@ -408,24 +427,15 @@ const TrackView = ({ pacer = null, autoStart = false }) => {
         remainingDistance={remainingDistance}
         remainingTime={remainingTime}
         isRunning={isRunning}
-        isResting={isResting}
         currentRep={currentRep}
         totalReps={totalReps}
-        restCountdown={restCountdown}
         formatTime={formatTime}
         onConnectPress={connectHelper}
         onStopPress={stopWorkout}
         onDisconnectPress={handleDisconnect}
         isConnected={isConnected}
+        showQuickStart={showQuickStart}
       />
-      {!connectionStatus && (
-        <View style={styles.connectionStatusContainer}>
-          <Icon name="bluetooth" size={36} color={iconColor} />
-          <Text style={[styles.connectionText, { color: iconColor }]}>
-            Not Connect
-          </Text>
-        </View>
-      )}
     </View>
   );
 };

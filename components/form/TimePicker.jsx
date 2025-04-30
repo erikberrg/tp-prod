@@ -1,14 +1,27 @@
-import React, {useState} from "react";
-import { View, StyleSheet, Text, TouchableOpacity, Keyboard, useColorScheme } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Keyboard,
+  useColorScheme,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { theme } from "../../constants/theme";
-import Animated, { FadeInUp, FadeOutUp, LinearTransition } from "react-native-reanimated";
+import Animated, {
+  FadeInUp,
+  FadeOutUp,
+  LinearTransition,
+} from "react-native-reanimated";
+import { formatRaceTime } from "../../helpers/calculations";
 
-export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
+export const TimePicker = ({ minutes, seconds, hundredths, onChangeTime }) => {
   const colorScheme = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
   const timesMin = Array.from({ length: 60 }, (_, i) => i);
   const timesSec = Array.from({ length: 59 }, (_, i) => i + 1);
+  const timeHundredths = Array.from({ length: 100 }, (_, i) => i);
   const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const toggleVisibility = (setter) => {
     Keyboard.dismiss();
@@ -17,20 +30,54 @@ export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
   return (
     <Animated.View layout={LinearTransition} style={styles.container}>
       <View style={styles.row}>
-        <Text style={[styles.label,{color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text}]}>Time</Text>
+        <Text
+          style={[
+            styles.label,
+            {
+              color: isDarkTheme
+                ? theme.darkColors.text
+                : theme.lightColors.text,
+            },
+          ]}
+        >
+          Time
+        </Text>
         <TouchableOpacity
           onPress={() => toggleVisibility(setIsTimePickerVisible)}
-          style={[styles.button,{backgroundColor: isDarkTheme ? theme.darkColors.sectionButton : theme.lightColors.sectionButton}]}
+          style={[
+            styles.button,
+            {
+              backgroundColor: isDarkTheme
+                ? theme.darkColors.sectionButton
+                : theme.lightColors.sectionButton,
+            },
+          ]}
         >
-        <Text style={[styles.label,{color: isDarkTheme ? theme.darkColors.text : theme.lightColors.text}]}>{minutes} min {seconds} sec</Text>
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isDarkTheme
+                  ? theme.darkColors.text
+                  : theme.lightColors.text,
+              },
+            ]}
+          >
+            {formatRaceTime(minutes, seconds, hundredths)}
+          </Text>
         </TouchableOpacity>
       </View>
       {isTimePickerVisible && (
-        <Animated.View entering={FadeInUp} exiting={FadeOutUp} style={styles.pickerContainer}>
+        <Animated.View
+          entering={FadeInUp}
+          exiting={FadeOutUp}
+          style={styles.pickerContainer}
+        >
           <Picker
             selectedValue={minutes}
-            onValueChange={(min) => onChangeTime(min, seconds)}
+            onValueChange={(min) => onChangeTime(min, seconds, hundredths)}
             style={styles.picker}
+            itemStyle={{ fontSize: 14 }}
           >
             {timesMin.map((time) => (
               <Picker.Item key={time} label={`${time} min`} value={time} />
@@ -38,11 +85,24 @@ export const TimePicker = ({ minutes, seconds, onChangeTime }) => {
           </Picker>
           <Picker
             selectedValue={seconds}
-            onValueChange={(sec) => onChangeTime(minutes, sec)}
+            onValueChange={(sec) => onChangeTime(minutes, sec, hundredths)}
             style={styles.picker}
+            itemStyle={{ fontSize: 14 }}
           >
             {timesSec.map((time) => (
               <Picker.Item key={time} label={`${time} sec`} value={time} />
+            ))}
+          </Picker>
+          <Picker
+            selectedValue={hundredths}
+            onValueChange={(newHundredths) =>
+              onChangeTime(minutes, seconds, newHundredths)
+            }
+            style={styles.picker}
+            itemStyle={{ fontSize: 14 }}
+          >
+            {timeHundredths.map((time) => (
+              <Picker.Item key={time} label={`${time} hs`} value={time} />
             ))}
           </Picker>
         </Animated.View>
@@ -82,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   picker: {
-    width: "49%",
+    flex: 1,
     marginVertical: 10,
   },
 });
