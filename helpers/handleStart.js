@@ -21,7 +21,7 @@ export const setAnimationHelpers = ({ setAnimationColor, startAnimation }) => {
 // 💡 Only animation logic here
 export const startPacerAnimation = async (pacer) => {
   try {
-    const duration = calculateDuration(pacer.minutes, pacer.seconds) * 1000;
+    const duration = calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths) * 1000;
     const distance = calculateDistance(pacer.distance);
     const repetitions = calculateRepetition(pacer.repetitions);
     const delay = calculateDelay(pacer.delay);
@@ -46,7 +46,7 @@ export const handleStart = async ({
       });
       await bleHelper.sendPacer(
         pacer.color,
-        calculateDuration(pacer.minutes, pacer.seconds),
+        calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths),
         calculateDistance(pacer.distance)
       );
       console.log("Pacer sent:", pacer);

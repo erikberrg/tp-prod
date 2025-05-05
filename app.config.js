@@ -16,7 +16,7 @@ export default {
       bundleIdentifier: "com.erikdberg.tpprod",
       infoPlist: {
         CFBundleDisplayName: "Track Pacer",
-        NSBluetoothAlwaysUsageDescription: "We need Bluetooth access to connect to your devices.",
+        NSBluetoothAlwaysUsageDescription: "Track Pacer uses Bluetooth to connect to pacing lights on the running track.",
        }
     },
     android: {

@@ -78,6 +78,8 @@ class BLEHelper {
     }
   
     const lapDuration = parseFloat(duration) / parseFloat(distance);
+    console.log(`Duration: ${duration}`);
+    console.log(`Lap duration: ${lapDuration}`);
     const segmentDelayMs = (lapDuration * 1000) / 5;
     const fullLapDelayMs = lapDuration * 1000;
   
@@ -85,6 +87,8 @@ class BLEHelper {
       console.log(`Starting lap ${lap + 1}/${distance}`);
   
       const firstPacer = `start ${color} ${lapDuration.toFixed(2)} ${distance}`;
+      console.log(`${lapDuration}`)
+      console.log(`Segment Distance: ${segmentDelayMs}`);
       console.log(`Sending pacer command: ${firstPacer}`);
   
       try {

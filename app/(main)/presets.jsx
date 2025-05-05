@@ -99,10 +99,34 @@ export default function ViewPresets() {
               try {
                 await bleHelper.scanAndConnect();
               } catch (scanError) {
-                console.log("Color: " + pacer.color)
-                console.log("Lap Time: " + calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths) / (pacer.distance / 200));
-                console.log("Segment Delay: " + (calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths) / (pacer.distance / 200)) / 5);
-                console.log("Total Time: " + calculateDuration(pacer.minutes, pacer.seconds, pacer.hundredths))
+                console.log("Color: " + pacer.color);
+                console.log(
+                  "Lap Time: " +
+                    calculateDuration(
+                      pacer.minutes,
+                      pacer.seconds,
+                      pacer.hundredths
+                    ) /
+                      (pacer.distance / 200)
+                );
+                console.log(
+                  "Segment Delay: " +
+                    calculateDuration(
+                      pacer.minutes,
+                      pacer.seconds,
+                      pacer.hundredths
+                    ) /
+                      (pacer.distance / 200) /
+                      5
+                );
+                console.log(
+                  "Total Time: " +
+                    calculateDuration(
+                      pacer.minutes,
+                      pacer.seconds,
+                      pacer.hundredths
+                    )
+                );
                 console.warn("Scan failed or timed out");
               }
             }
@@ -120,7 +144,6 @@ export default function ViewPresets() {
               });
               return;
             }
-
             await startPacerAnimation(pacer);
             // If connected, continue with the normal flow
             await handleStart({
