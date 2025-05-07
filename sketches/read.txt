@@ -1,0 +1,1 @@
+These are the c++ scripts for the esp32's in the junction boxes.  The unit 1 code includes the bluetooth logic, and the unit 2 code is for units 2-5 that just has the receiver code and the logic.
