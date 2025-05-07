@@ -1,0 +1,1 @@
+These sketches are the code for the esp32's the mainUnit1.cpp is for unit 1 and has the c++ code with the bluetooth logic and the main logic, the mainUnit2.cpp is for unit 2-5 and has only the main logic and the receiving code to receive updates from unit 1 about the location of the pacer.
